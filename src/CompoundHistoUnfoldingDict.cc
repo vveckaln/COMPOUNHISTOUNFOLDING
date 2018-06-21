@@ -55,7 +55,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 21,
+         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 22,
                   typeid(::CompoundHistoUnfolding), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding) );
@@ -72,6 +72,70 @@ namespace ROOT {
    }
    // Static variable to force the class initialization
    static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const ::CompoundHistoUnfolding*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+} // end of namespace ROOT
+
+namespace ROOT {
+   static void *new_CompoundHistoUnfoldingcLcLLevel(void *p = 0);
+   static void *newArray_CompoundHistoUnfoldingcLcLLevel(Long_t size, void *p);
+   static void delete_CompoundHistoUnfoldingcLcLLevel(void *p);
+   static void deleteArray_CompoundHistoUnfoldingcLcLLevel(void *p);
+   static void destruct_CompoundHistoUnfoldingcLcLLevel(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::CompoundHistoUnfolding::Level*)
+   {
+      ::CompoundHistoUnfolding::Level *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level >(0);
+      static ::ROOT::TGenericClassInfo 
+         instance("CompoundHistoUnfolding::Level", ::CompoundHistoUnfolding::Level::Class_Version(), "interface/CompoundHistoUnfolding.hh", 59,
+                  typeid(::CompoundHistoUnfolding::Level), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &::CompoundHistoUnfolding::Level::Dictionary, isa_proxy, 4,
+                  sizeof(::CompoundHistoUnfolding::Level) );
+      instance.SetNew(&new_CompoundHistoUnfoldingcLcLLevel);
+      instance.SetNewArray(&newArray_CompoundHistoUnfoldingcLcLLevel);
+      instance.SetDelete(&delete_CompoundHistoUnfoldingcLcLLevel);
+      instance.SetDeleteArray(&deleteArray_CompoundHistoUnfoldingcLcLLevel);
+      instance.SetDestructor(&destruct_CompoundHistoUnfoldingcLcLLevel);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::CompoundHistoUnfolding::Level*)
+   {
+      return GenerateInitInstanceLocal((::CompoundHistoUnfolding::Level*)0);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+} // end of namespace ROOT
+
+namespace ROOT {
+   static void *new_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p = 0);
+   static void *newArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(Long_t size, void *p);
+   static void delete_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p);
+   static void deleteArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p);
+   static void destruct_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::CompoundHistoUnfolding::Level::ProjectionDeco*)
+   {
+      ::CompoundHistoUnfolding::Level::ProjectionDeco *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level::ProjectionDeco >(0);
+      static ::ROOT::TGenericClassInfo 
+         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 76,
+                  typeid(::CompoundHistoUnfolding::Level::ProjectionDeco), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &::CompoundHistoUnfolding::Level::ProjectionDeco::Dictionary, isa_proxy, 4,
+                  sizeof(::CompoundHistoUnfolding::Level::ProjectionDeco) );
+      instance.SetNew(&new_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco);
+      instance.SetNewArray(&newArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco);
+      instance.SetDelete(&delete_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco);
+      instance.SetDeleteArray(&deleteArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco);
+      instance.SetDestructor(&destruct_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::CompoundHistoUnfolding::Level::ProjectionDeco*)
+   {
+      return GenerateInitInstanceLocal((::CompoundHistoUnfolding::Level::ProjectionDeco*)0);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level::ProjectionDeco*)0x0); R__UseDummy(_R__UNIQUE_(Init));
 } // end of namespace ROOT
 
 //______________________________________________________________________________
@@ -110,6 +174,76 @@ TClass *CompoundHistoUnfolding::Class()
 }
 
 //______________________________________________________________________________
+atomic_TClass_ptr CompoundHistoUnfolding::Level::fgIsA(0);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *CompoundHistoUnfolding::Level::Class_Name()
+{
+   return "CompoundHistoUnfolding::Level";
+}
+
+//______________________________________________________________________________
+const char *CompoundHistoUnfolding::Level::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level*)0x0)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int CompoundHistoUnfolding::Level::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level*)0x0)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *CompoundHistoUnfolding::Level::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level*)0x0)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *CompoundHistoUnfolding::Level::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD2(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level*)0x0)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+atomic_TClass_ptr CompoundHistoUnfolding::Level::ProjectionDeco::fgIsA(0);  // static to hold class pointer
+
+//______________________________________________________________________________
+const char *CompoundHistoUnfolding::Level::ProjectionDeco::Class_Name()
+{
+   return "CompoundHistoUnfolding::Level::ProjectionDeco";
+}
+
+//______________________________________________________________________________
+const char *CompoundHistoUnfolding::Level::ProjectionDeco::ImplFileName()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level::ProjectionDeco*)0x0)->GetImplFileName();
+}
+
+//______________________________________________________________________________
+int CompoundHistoUnfolding::Level::ProjectionDeco::ImplFileLine()
+{
+   return ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level::ProjectionDeco*)0x0)->GetImplFileLine();
+}
+
+//______________________________________________________________________________
+TClass *CompoundHistoUnfolding::Level::ProjectionDeco::Dictionary()
+{
+   fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level::ProjectionDeco*)0x0)->GetClass();
+   return fgIsA;
+}
+
+//______________________________________________________________________________
+TClass *CompoundHistoUnfolding::Level::ProjectionDeco::Class()
+{
+   if (!fgIsA.load()) { R__LOCKGUARD2(gInterpreterMutex); fgIsA = ::ROOT::GenerateInitInstanceLocal((const ::CompoundHistoUnfolding::Level::ProjectionDeco*)0x0)->GetClass(); }
+   return fgIsA;
+}
+
+//______________________________________________________________________________
 void CompoundHistoUnfolding::Streamer(TBuffer &R__b)
 {
    // Stream an object of class CompoundHistoUnfolding.
@@ -141,6 +275,135 @@ namespace ROOT {
       ((current_t*)p)->~current_t();
    }
 } // end of namespace ROOT for class ::CompoundHistoUnfolding
+
+//______________________________________________________________________________
+void CompoundHistoUnfolding::Level::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class CompoundHistoUnfolding::Level.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(CompoundHistoUnfolding::Level::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(CompoundHistoUnfolding::Level::Class(),this);
+   }
+}
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_CompoundHistoUnfoldingcLcLLevel(void *p) {
+      return  p ? new(p) ::CompoundHistoUnfolding::Level : new ::CompoundHistoUnfolding::Level;
+   }
+   static void *newArray_CompoundHistoUnfoldingcLcLLevel(Long_t nElements, void *p) {
+      return p ? new(p) ::CompoundHistoUnfolding::Level[nElements] : new ::CompoundHistoUnfolding::Level[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_CompoundHistoUnfoldingcLcLLevel(void *p) {
+      delete ((::CompoundHistoUnfolding::Level*)p);
+   }
+   static void deleteArray_CompoundHistoUnfoldingcLcLLevel(void *p) {
+      delete [] ((::CompoundHistoUnfolding::Level*)p);
+   }
+   static void destruct_CompoundHistoUnfoldingcLcLLevel(void *p) {
+      typedef ::CompoundHistoUnfolding::Level current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::CompoundHistoUnfolding::Level
+
+//______________________________________________________________________________
+void CompoundHistoUnfolding::Level::ProjectionDeco::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class CompoundHistoUnfolding::Level::ProjectionDeco.
+
+   if (R__b.IsReading()) {
+      R__b.ReadClassBuffer(CompoundHistoUnfolding::Level::ProjectionDeco::Class(),this);
+   } else {
+      R__b.WriteClassBuffer(CompoundHistoUnfolding::Level::ProjectionDeco::Class(),this);
+   }
+}
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p) {
+      return  p ? new(p) ::CompoundHistoUnfolding::Level::ProjectionDeco : new ::CompoundHistoUnfolding::Level::ProjectionDeco;
+   }
+   static void *newArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(Long_t nElements, void *p) {
+      return p ? new(p) ::CompoundHistoUnfolding::Level::ProjectionDeco[nElements] : new ::CompoundHistoUnfolding::Level::ProjectionDeco[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p) {
+      delete ((::CompoundHistoUnfolding::Level::ProjectionDeco*)p);
+   }
+   static void deleteArray_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p) {
+      delete [] ((::CompoundHistoUnfolding::Level::ProjectionDeco*)p);
+   }
+   static void destruct_CompoundHistoUnfoldingcLcLLevelcLcLProjectionDeco(void *p) {
+      typedef ::CompoundHistoUnfolding::Level::ProjectionDeco current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::CompoundHistoUnfolding::Level::ProjectionDeco
+
+namespace ROOT {
+   static TClass *vectorlESampleDescriptormUgR_Dictionary();
+   static void vectorlESampleDescriptormUgR_TClassManip(TClass*);
+   static void *new_vectorlESampleDescriptormUgR(void *p = 0);
+   static void *newArray_vectorlESampleDescriptormUgR(Long_t size, void *p);
+   static void delete_vectorlESampleDescriptormUgR(void *p);
+   static void deleteArray_vectorlESampleDescriptormUgR(void *p);
+   static void destruct_vectorlESampleDescriptormUgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<SampleDescriptor*>*)
+   {
+      vector<SampleDescriptor*> *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<SampleDescriptor*>));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<SampleDescriptor*>", -2, "vector", 214,
+                  typeid(vector<SampleDescriptor*>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlESampleDescriptormUgR_Dictionary, isa_proxy, 0,
+                  sizeof(vector<SampleDescriptor*>) );
+      instance.SetNew(&new_vectorlESampleDescriptormUgR);
+      instance.SetNewArray(&newArray_vectorlESampleDescriptormUgR);
+      instance.SetDelete(&delete_vectorlESampleDescriptormUgR);
+      instance.SetDeleteArray(&deleteArray_vectorlESampleDescriptormUgR);
+      instance.SetDestructor(&destruct_vectorlESampleDescriptormUgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<SampleDescriptor*> >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const vector<SampleDescriptor*>*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlESampleDescriptormUgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const vector<SampleDescriptor*>*)0x0)->GetClass();
+      vectorlESampleDescriptormUgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlESampleDescriptormUgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlESampleDescriptormUgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<SampleDescriptor*> : new vector<SampleDescriptor*>;
+   }
+   static void *newArray_vectorlESampleDescriptormUgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<SampleDescriptor*>[nElements] : new vector<SampleDescriptor*>[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlESampleDescriptormUgR(void *p) {
+      delete ((vector<SampleDescriptor*>*)p);
+   }
+   static void deleteArray_vectorlESampleDescriptormUgR(void *p) {
+      delete [] ((vector<SampleDescriptor*>*)p);
+   }
+   static void destruct_vectorlESampleDescriptormUgR(void *p) {
+      typedef vector<SampleDescriptor*> current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class vector<SampleDescriptor*>
 
 namespace ROOT {
    static TClass *vectorlEHistoUnfoldingmUgR_Dictionary();
@@ -301,6 +564,8 @@ class __attribute__((annotate("$clingAutoload$interface/CompoundHistoUnfolding.h
 )DICTPAYLOAD";
     static const char* classesHeaders[]={
 "CompoundHistoUnfolding", payloadCode, "@",
+"CompoundHistoUnfolding::Level", payloadCode, "@",
+"CompoundHistoUnfolding::Level::ProjectionDeco", payloadCode, "@",
 nullptr};
 
     static bool isInitialized = false;

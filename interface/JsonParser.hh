@@ -8,7 +8,9 @@ class JsonParser
 {
   vector<SampleDescriptor *> _samples;
   void ParseSample(const char*, SampleDescriptor &, SysTypeCode_t = NOMINAL);
+  char _signal_tag[64];
 public:
+  void SetSignalTag(const char *);
   void Load(const char *, SysTypeCode_t = NOMINAL);
   void ls();
   unsigned long GetSize();

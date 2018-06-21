@@ -43,8 +43,6 @@ namespace std {} using namespace std;
 // Header files passed via #pragma extra_include
 
 namespace ROOT {
-   static void *new_HistoUnfolding(void *p = 0);
-   static void *newArray_HistoUnfolding(Long_t size, void *p);
    static void delete_HistoUnfolding(void *p);
    static void deleteArray_HistoUnfolding(void *p);
    static void destruct_HistoUnfolding(void *p);
@@ -55,12 +53,10 @@ namespace ROOT {
       ::HistoUnfolding *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::HistoUnfolding >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("HistoUnfolding", ::HistoUnfolding::Class_Version(), "interface/HistoUnfolding.hh", 5,
+         instance("HistoUnfolding", ::HistoUnfolding::Class_Version(), "interface/HistoUnfolding.hh", 6,
                   typeid(::HistoUnfolding), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::HistoUnfolding::Dictionary, isa_proxy, 4,
                   sizeof(::HistoUnfolding) );
-      instance.SetNew(&new_HistoUnfolding);
-      instance.SetNewArray(&newArray_HistoUnfolding);
       instance.SetDelete(&delete_HistoUnfolding);
       instance.SetDeleteArray(&deleteArray_HistoUnfolding);
       instance.SetDestructor(&destruct_HistoUnfolding);
@@ -122,13 +118,6 @@ void HistoUnfolding::Streamer(TBuffer &R__b)
 }
 
 namespace ROOT {
-   // Wrappers around operator new
-   static void *new_HistoUnfolding(void *p) {
-      return  p ? new(p) ::HistoUnfolding : new ::HistoUnfolding;
-   }
-   static void *newArray_HistoUnfolding(Long_t nElements, void *p) {
-      return p ? new(p) ::HistoUnfolding[nElements] : new ::HistoUnfolding[nElements];
-   }
    // Wrapper around operator delete
    static void delete_HistoUnfolding(void *p) {
       delete ((::HistoUnfolding*)p);

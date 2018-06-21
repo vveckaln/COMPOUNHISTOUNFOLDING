@@ -211,18 +211,6 @@ void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysType
     }
   //printf("title test [%s]\n", fields[3]);
   sd._tag = tag;
-  if (TString(fields[1]) == '1')
-    {
-      sd._sample_type = DATA;
-    }
-  else if (TString(fields[3]) == "\"t#bar{t}\"")
-    {
-      sd._sample_type = SIGNAL;
-    }
-  else
-    {
-      sd._sample_type = BACKGROUND;
-    }
   sd._xsec = (stof(fields[0], 0));
   sd._title = fields[3];
   if (fields[4][0] == '"')
@@ -236,6 +224,18 @@ void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysType
   sd._sys_type = sys;
   //sd.ls();
   sd.PruneStringsFromQuotes();
+  if (TString(fields[1]) == '1')
+    {
+      sd._sample_type = DATA;
+    }
+  else if (TString(sd._tag) == _signal_tag)
+    {
+      sd._sample_type = SIGNAL;
+    }
+  else
+    {
+      sd._sample_type = BACKGROUND;
+    }
   delete[] fields[0];
   delete[] fields[1];
   delete[] fields[2];
@@ -308,6 +308,12 @@ SampleDescriptor * JsonParser::GetSample(unsigned long ind)
 {
   return _samples[ind];
 } 
+
+
+void JsonParser::SetSignalTag(const char * tag)
+{
+  sprintf(_signal_tag, "%s", tag);
+}
 
 
 JsonParser::~JsonParser()
