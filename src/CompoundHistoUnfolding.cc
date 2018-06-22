@@ -18,7 +18,7 @@ void CompoundHistoUnfolding::Process()
   CreateListOfExpSysSamples();
   CreateMCTotal(IN);
   unfold();
-  createCov(OUT);
+  createCov();
   CreateMCTotal(OUT);
   CreateTotalMCUnc(IN, RECO);
   CreateTotalMCUnc(IN, RECO, true);
@@ -231,7 +231,7 @@ void CompoundHistoUnfolding::ApproximateTheorSys()
 {
   if (string(signaltag).compare("MC13TeV_TTJets") == 0)
     return;
-  const TString binfilename = TString("/eos/user/v/vveckaln/unfolding_") + method + "/" + tag_jet_types_[jetcode] + '_' + tag_charge_types_[chargecode] + '_' + "MC13TeV_TTJets" + '_' + observable + '_' + tag_opt[optcode] + "/save.root";
+  const TString binfilename = TString("/eos/user/v/vveckaln/unfolding_") + method + "/" + tag_jet_types_[jetcode] + '_' + tag_charge_types_[chargecode] + '_' + "MC13TeV_TTJets" + '_' + observable + '_' + tag_opt[optcode] + '_' + method + "/save.root";
   TFile * fMC13TeV_TTJets = TFile::Open(binfilename);
   TH2F * hMC13TeV_TTJets = (TH2F*) fMC13TeV_TTJets -> Get(TString(tag_opt[optcode]) + "_MC13TeV_TTJets_aggr");
   for (vector<HistoUnfolding *>::iterator it = GetLevel(IN) -> _vsyshistos.begin(); it != GetLevel(IN) -> _vsyshistos.end(); it ++)

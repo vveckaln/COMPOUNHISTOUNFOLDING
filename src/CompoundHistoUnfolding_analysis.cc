@@ -196,26 +196,19 @@ HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, co
 }
 
 
-void CompoundHistoUnfolding::createCov(ResultLevelCode_t resultcode)
+void CompoundHistoUnfolding::createCov()
 {
-  CreateDataMinusBackground(IN);
-  TH1F * hdsignal = GetLevel(resultcode) -> GetHU(SIGNALMO) -> Project(GEN, "hsignal");
+  const ResultLevelCode_t resultlevel = OUT;
+  TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALMO) -> Project(GEN, "hsignal");
   //NormaliseToBinWidth(hdsignal);
   const unsigned char nbins = hdsignal -> GetNbinsX();
+  GetLevel(resultlevel) -> cov = new TMatrixD(nbins, nbins);
+  GetLevel(resultlevel) -> cov -> Zero();
+  GetLevel(resultlevel) -> cov -> Print();
   for (vector<SampleDescriptor *>::iterator it = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
     {
-      TH1F * hsysdown = GetExpSys(resultcode, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
-      TH1F * hsysup = GetExpSys(resultcode, (*it) -> GetTag(), UP) -> Project(GEN, "up");
-      NormaliseToBinWidth(hsysdown);
-      NormaliseToBinWidth(hsysup);
-    }
-  GetLevel(resultcode) -> cov = new TMatrixD(nbins, nbins);
-  GetLevel(resultcode) -> cov -> Zero();
-  GetLevel(resultcode) -> cov -> Print();
-  for (vector<SampleDescriptor *>::iterator it = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
-    {
-      TH1F * hsysdown = GetExpSys(resultcode, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
-      TH1F * hsysup = GetExpSys(resultcode, (*it) -> GetTag(), UP) -> Project(GEN, "up");
+      TH1F * hsysdown = GetExpSys(resultlevel, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
+      TH1F * hsysup = GetExpSys(resultlevel, (*it) -> GetTag(), UP) -> Project(GEN, "up");
       //      NormaliseToBinWidth(hsysdown);
       //NormaliseToBinWidth(hsysup);
       for (unsigned char xind = 1; xind < nbins + 1; xind ++)
@@ -245,7 +238,7 @@ void CompoundHistoUnfolding::createCov(ResultLevelCode_t resultcode)
 		{
 		  sign = -1.0;
 		}
-	      (*GetLevel(resultcode) -> cov)(xind - 1, yind - 1) += TMath::Abs(xc)*TMath::Abs(yc)*sign; 
+	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += TMath::Abs(xc)*TMath::Abs(yc)*sign; 
 	    }
 	}
       delete hsysdown;
@@ -253,7 +246,7 @@ void CompoundHistoUnfolding::createCov(ResultLevelCode_t resultcode)
     }
   for (vector<SampleDescriptor *>::iterator it = _markedsyssamples.begin(); it != _markedsyssamples.end(); it ++)
     {
-      TH1F * hsys = GetSys(resultcode, (*it) -> GetTag()) -> Project(GEN, "markedsys");
+      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag()) -> Project(GEN, "markedsys");
       NormaliseToBinWidth(hsys);
       for (unsigned char xind = 1; xind < nbins + 1; xind ++)
 	{
@@ -263,14 +256,14 @@ void CompoundHistoUnfolding::createCov(ResultLevelCode_t resultcode)
 	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignal -> GetBinContent(yind));
 	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
 		(hdsignal  -> GetBinContent(xind) - meanx) * (hdsignal  -> GetBinContent(yind) - meany);
-	      (*GetLevel(resultcode) -> cov)(xind - 1, yind - 1) += cov; 
+	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
 	    }
 	}
     }
   printf("covariance matrix\n");
-  GetLevel(resultcode) -> cov -> Print();
+  GetLevel(resultlevel) -> cov -> Print();
   TCanvas * c = new TCanvas("cov", "cov");
-  GetLevel(resultcode) -> cov -> Draw("COLZ");
+  GetLevel(resultlevel) -> cov -> Draw("COLZ");
   c -> SaveAs(TString(_folder) + "/cov.png");
   delete hdsignal;
 } 
@@ -279,8 +272,8 @@ double CompoundHistoUnfolding::GetChi()
 {
   TH1F * hdata = GetLevel(OUT) -> GetHU(SIGNALMO) -> Project(GEN, "hdata");
   TH1F * hmodel = GetLevel(IN) -> GetHU(SIGNALMO) -> Project(GEN, "hmodel");
-  NormaliseToBinWidth(hdata);
-  NormaliseToBinWidth(hmodel);
+  //NormaliseToBinWidth(hdata);
+  //NormaliseToBinWidth(hmodel);
   const char nbins = hmodel -> GetNbinsX();
   TMatrixD D(nbins, 1);
   for (unsigned char bin_ind = 1; bin_ind < nbins + 1; bin_ind ++)
