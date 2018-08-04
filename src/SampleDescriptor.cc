@@ -23,17 +23,36 @@ void SampleDescriptor::ls(Option_t * opt) const
   
 }
 
-SampleDescriptor::SampleDescriptor(): size(256), _xsec(0.0), _tag(nullptr), _title(nullptr), _color(nullptr), _colornum(0), _sample_type(0), _sys_type(0) 
+SampleDescriptor::SampleDescriptor(): size(0), size_color(0), _xsec(0.0), _tag(nullptr), _title(nullptr), _color(nullptr), _colornum(0), _sample_type(0), _sys_type(0) 
 {
+  //printf("calling SampleDescriptor::SampleDescriptor()\n");
 }
 
-SampleDescriptor::SampleDescriptor(SampleDescriptor *sd): SampleDescriptor() 
+SampleDescriptor::SampleDescriptor(SampleDescriptor & sd): SampleDescriptor()
 {
+  SetXsec(sd . GetXsec());
+  SetSampleType(sd . GetSampleType());
+  SetSysType(sd . GetSysType());
+  SetTitle(sd . GetTitle());
+  SetTag(sd . GetTag());
+  if (sd._color)
+    SetColor(sd . GetColor());
+  else
+    _colornum = sd . _colornum;
+}
+
+/*SampleDescriptor::SampleDescriptor(SampleDescriptor *sd): SampleDescriptor() 
+{
+  printf("calling SampleDescriptor::SampleDescriptor(SampleDescriptor *sd)\n");
+  SetXsec(sd -> GetXsec());
+  SetSampleType(sd -> GetSampleType());
+  SetSysType(sd -> GetSysType());
   SetTitle(sd -> GetTitle());
   SetTag(sd -> GetTag());
   SetColor(sd -> GetColor());
+  _colornum = sd -> _colornum;
 }
-
+*/
 
 float SampleDescriptor::GetXsec() const
 {
@@ -78,29 +97,45 @@ void SampleDescriptor::SetXsec(float xsec)
 void SampleDescriptor::SetTitle(const char * title)
 {
   if (not _title)
-    _title = new char[size];
+    {
+      size = 256;
+      _title = new char[size];
+    }
   sprintf(_title, "%s", title);
 }
 void SampleDescriptor::SetTag(const char * tag)
 {
   if (not _tag)
-    _tag = new char[size];
+    {
+      size = 256;
+      _tag = new char[size];
+    }
   sprintf(_tag, "%s", tag);
 }
 void SampleDescriptor::SetColor(const char * color)
 {
   if (not _color)
-    _color = new char[size];
+    {
+      size_color = 256;
+      _color = new char[size];
+    }
   sprintf(_color, "%s", color);
 }
 void SampleDescriptor::SetSampleType(SampleTypeCode_t sample_type)
 {
   _sample_type = sample_type;
 }
-void SampleDescriptor::SetSysTypeCode(SysTypeCode_t sys_type)
+void SampleDescriptor::SetSysType(SysTypeCode_t sys_type)
 {
   _sys_type = sys_type;
 }
+
+void SampleDescriptor::Unset()
+{
+  _tag   = nullptr;
+  _title = nullptr;
+  _color = nullptr;
+} 
 
 SampleDescriptor::~SampleDescriptor()
 {

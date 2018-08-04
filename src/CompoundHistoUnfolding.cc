@@ -121,7 +121,7 @@ void CompoundHistoUnfolding::unfold()
   hsignal -> Draw("COLZ");
   cmigration.SaveAs(TString(_folder) + "/migrationmatrix.png");
   TUnfoldDensity unfold(hsignal, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature, TUnfold::kEConstraintArea, TUnfoldDensity::kDensityModeBinWidthAndUser);
-  TH1F * input = /*(TH1F*) _signalh -> _th2 -> ProjectionX(); */GetLevel(IN) -> GetHU(DATAMBCKG) -> Project(RECO, CreateName("input"));
+  input = /*(TH1F*) _signalh -> _th2 -> ProjectionX(); */GetLevel(IN) -> GetHU(DATAMBCKG) -> Project(RECO, CreateName("input"));
 
   ApplyScaleFactor(input);
   input -> SetMinimum(0.0);
@@ -130,7 +130,8 @@ void CompoundHistoUnfolding::unfold()
   unfold.DoUnfold(0.0);
   TCanvas *coutput = new TCanvas(CreateName("coutput"), CreateTitle("coutput"));
   THStack *coutput_stack = new THStack(CreateName("output"), CreateTitle("output"));
-  TH1F * houtput = (TH1F*) unfold.GetOutput(CreateName("output"));
+  TH1 * houtput = unfold.GetOutput(CreateName("output"));
+  houtput -> SetDirectory(nullptr);
   TH1F * py = GetLevel(IN) -> GetHU(SIGNALMO) -> Project(GEN, CreateName("py"));
   py -> SetMinimum(0.0);
   NormaliseToBinWidth(py);
@@ -153,7 +154,8 @@ void CompoundHistoUnfolding::unfold()
   GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1Ref(GEN) = houtput;
   TCanvas * cfolded_output = new TCanvas(CreateName("folded_output"), CreateTitle("folded_output"));
   THStack * cfolded_output_stack = new THStack(CreateName("cfolded_output_stack"), CreateTitle("cfolded output"));
-  TH1F * hfolded_output = (TH1F*) unfold.GetFoldedOutput(CreateName("folded_output"));
+  TH1 * hfolded_output = unfold.GetFoldedOutput(CreateName("folded_output"));
+  hfolded_output -> SetDirectory(nullptr);
   TH1F * px = GetLevel(IN) -> GetHU(SIGNALMO) -> Project(RECO, CreateName("px")); 
   NormaliseToBinWidth(px);
   px -> SetMinimum(0.0);
@@ -180,7 +182,11 @@ void CompoundHistoUnfolding::unfold()
   legend_input.Draw("SAME");
   cfolded_output -> SaveAs(TString(_folder) + "/" + "cfolded_output.png");
   GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1Ref(RECO) = hfolded_output; 
-  GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1Ref(GEN) = houtput;
+  //  GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1Ref(GEN) = houtput;
+  if (TString(signaltag) == "MC13TeV_TTJets")
+    {
+      GetLevel(OUT) -> GetHURef(SIGNALNOMINALMO) = GetLevel(OUT) -> GetHU(SIGNALMO);
+    }
   for (vector<HistoUnfolding *>::iterator it = GetLevel(IN) -> GetV(SYSMO) -> begin(); it != GetLevel(IN) -> GetV(SYSMO) -> end(); it ++)
     {
       TUnfoldDensity unfold((*it) -> GetTH2(), TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature, TUnfold::kEConstraintArea, TUnfoldDensity::kDensityModeUser);
@@ -188,8 +194,8 @@ void CompoundHistoUnfolding::unfold()
       unfold.DoUnfold(0.0);
       HistoUnfoldingTH1 * out = new HistoUnfoldingTH1((SampleDescriptor * ) * it);
       GetLevel(OUT) -> GetV(SYSMO) -> push_back(out);
-      out -> GetTH1Ref(RECO) = (TH1F*) unfold.GetFoldedOutput(CreateName(TString((*it) -> GetTag()) + "_output"));
-      out -> GetTH1Ref(GEN) = (TH1F*) unfold.GetOutput(CreateName(TString((*it) ->GetTag()) + "_folded_output"));
+      out -> GetTH1Ref(RECO) = (TH1F*) unfold.GetFoldedOutput(CreateName(TString((*it) -> GetTag()) + "_folded_output"));
+      out -> GetTH1Ref(GEN) = (TH1F*) unfold.GetOutput(CreateName(TString((*it) ->GetTag()) + "_output"));
     }
   GetLevel(OUT) -> GetHURef(DATAMO) = new HistoUnfoldingTH2((HistoUnfoldingTH2*) GetLevel(IN) -> GetHU(DATAMO), CreateName("OUTData"));
   
@@ -206,10 +212,12 @@ void CompoundHistoUnfolding::LoadHistos(const char * json, SysTypeCode_t sys)
       HistoUnfoldingTH2 *h = nullptr;
       if (TString(signaltag) != "MC13TeV_TTJets2l2nu_amcatnlo" and TString(parser.GetSample(sind) -> GetTag()) == "MC13TeV_TTJets2l2nu_amcatnlo") 
 	continue;
+      if (TString(method) == "nominal" and TString(parser.GetSample(sind) -> GetTag()) == "MC13TeV_TTJets_cflip")
+	continue;
       if (TString(parser.GetSample(sind) -> GetTag()) == TString(signaltag))
-	parser.GetSample(sind) -> SetSysTypeCode(NOMINAL);
+	parser.GetSample(sind) -> SetSysType(NOMINAL);
       if (TString(parser.GetSample(sind) -> GetTag()) == "MC13TeV_TTJets" and TString(signaltag) != "MC13TeV_TTJets")
-	parser.GetSample(sind) -> SetSysTypeCode(THEORSYS);
+	parser.GetSample(sind) -> SetSysType(THEORSYS);
       if (sys == EXPSYS)
 	parser.GetSample(sind) -> SetTag(TString(parser.GetSample(sind) -> GetTag()).ReplaceAll("MC13TeV_TTJets", signaltag));
       if (IsRegular())
@@ -234,10 +242,15 @@ void CompoundHistoUnfolding::ApproximateTheorSys()
   const TString binfilename = TString("/eos/user/v/vveckaln/unfolding_") + method + "/" + tag_jet_types_[jetcode] + '_' + tag_charge_types_[chargecode] + '_' + "MC13TeV_TTJets" + '_' + observable + '_' + tag_opt[optcode] + '_' + method + "/save.root";
   TFile * fMC13TeV_TTJets = TFile::Open(binfilename);
   TH2F * hMC13TeV_TTJets = (TH2F*) fMC13TeV_TTJets -> Get(TString(tag_opt[optcode]) + "_MC13TeV_TTJets_aggr");
+  GetLevel(IN) -> GetHU(SIGNALMO) -> Project(RECO, "sigtestproj") -> Print("all");
   for (vector<HistoUnfolding *>::iterator it = GetLevel(IN) -> _vsyshistos.begin(); it != GetLevel(IN) -> _vsyshistos.end(); it ++)
     {
       if ((*it) -> GetSysType() != THEORSYS)
 	continue;
+      if (TString((*it) -> GetTag()) == "MC13TeV_TTJets")
+	{
+	  continue;
+	}
       TH2F * h = (*it) -> GetTH2();
       for (unsigned char xbin = 0; xbin < h -> GetNbinsX() + 2; xbin ++)
 	{
@@ -401,7 +414,7 @@ void CompoundHistoUnfolding::CreateTotalMCUnc(ResultLevelCode_t resultcode, Reco
   MOCode_t mo = shape ? TOTALMCUNCSHAPE : TOTALMCUNC;
   if (not GetLevel(resultcode) -> GetHU(mo))
     GetLevel(resultcode) -> GetHURef(mo) = new HistoUnfoldingTH1();
-  TH1F *& htotalMCUnc = GetLevel(resultcode) -> GetHU(mo) -> GetTH1Ref(recocode);
+  TH1 *& htotalMCUnc = GetLevel(resultcode) -> GetHU(mo) -> GetTH1Ref(recocode);
   htotalMCUnc = GetLevel(resultcode) -> GetHU(TOTALMC) -> Project(recocode, CreateName(shape ? "totalMCUncShape" : "totalMCUnc"));
 
   const unsigned char nbins = htotalMCUnc -> GetNbinsX();
@@ -419,6 +432,16 @@ void CompoundHistoUnfolding::CreateTotalMCUnc(ResultLevelCode_t resultcode, Reco
       sysUp[ind] = 0.0;
       sysDown[ind] = 0.0;
     }
+  FILE * uncfile(nullptr);
+  if (not shape)
+    {
+      const TString uncfilename = TString(_folder) + 
+	"/unc_" + 
+	tag_resultlevel[resultcode] + "_" + 
+	tag_recolevel[recocode] + ".txt";
+      uncfile = fopen(uncfilename, "w");
+      //      printf("%p %s\n", uncfile, uncfilename.Data());
+    }
   for (vector<HistoUnfolding *>::iterator it = GetLevel(resultcode) -> GetV(SYSMO) -> begin(); it != GetLevel(resultcode) -> GetV(SYSMO) -> end(); it ++)
     {
       TH1F* hsys = (*it) -> Project(recocode);
@@ -431,7 +454,13 @@ void CompoundHistoUnfolding::CreateTotalMCUnc(ResultLevelCode_t resultcode, Reco
       for (unsigned char bin_ind = 0; bin_ind < nbins + 2; bin_ind ++)
 	{
 	  const float diff = hsys -> GetBinContent(bin_ind) - hsig -> GetBinContent(bin_ind);
-	  //  printf("bin_ind %u diff %f\n", bin_ind, diff);
+	  if (bin_ind == 1 and not shape)
+	    {
+	      float diffnom = hsys -> GetBinContent(bin_ind)/hsys -> Integral() - hsig -> GetBinContent(bin_ind)/hsig -> Integral();
+	      diffnom = fabs(diffnom) * hsig -> Integral()/hsig -> GetBinContent(bin_ind) * 100;
+	      //      printf("uncertainty %s diff %f %\n", (*it) -> GetTag(), diffnom);
+	      fprintf(uncfile, "%s\t%.9f\t%.9f\n", (*it) -> GetTag(), hsys -> GetBinContent(bin_ind)/hsys -> Integral(), hsig -> GetBinContent(bin_ind)/hsig -> Integral());
+	    }
 	  if (diff > 0)
 	    {
 	      sysUp[bin_ind] = TMath::Sqrt(TMath::Power(sysUp[bin_ind], 2) + TMath::Power(diff, 2));
@@ -443,13 +472,16 @@ void CompoundHistoUnfolding::CreateTotalMCUnc(ResultLevelCode_t resultcode, Reco
 	}
       delete hsys;
     }
+  if (uncfile)
+    {
+      fclose(uncfile);
+    }
   for (unsigned char bin_ind = 0; bin_ind < nbins + 2; bin_ind ++)
     {
       htotalMCUnc -> SetBinContent(bin_ind, htotalMCUnc -> GetBinContent(bin_ind) + (sysUp[bin_ind] - sysDown[bin_ind])/2.0);
       htotalMCUnc -> SetBinError(bin_ind, TMath::Sqrt(TMath::Power(htotalMCUnc -> GetBinError(bin_ind), 2) + TMath::Power((sysUp[bin_ind] + sysDown[bin_ind])/2.0, 2)));
     }
   delete hsig;
-
   NormaliseToBinWidth(htotalMCUnc);
 }
 
@@ -568,8 +600,8 @@ TPad * CompoundHistoUnfolding::CreateMainPlot(RecoLevelCode_t recocode, ResultLe
   float max = 0.0;
   TH1F * totalMC = level -> GetHU(TOTALMC) -> Project(recocode, CreateName("totalMCmp"));
   //  TH1F * data = nullptr;
-  TH1F * totalMCUnc = level -> GetHU(TOTALMCUNC) -> GetTH1(recocode);
-  TH1F * totalMCUncShape = level -> GetHU(TOTALMCUNCSHAPE) -> GetTH1(recocode);;
+  TH1 * totalMCUnc = level -> GetHU(TOTALMCUNC) -> GetTH1(recocode);
+  TH1 * totalMCUncShape = level -> GetHU(TOTALMCUNCSHAPE) -> GetTH1(recocode);;
   TH1F * hoverlay = nullptr;
   TLegend * legend = projdeco -> legend;
   if (recocode == RECO and resultcode == IN)
@@ -648,9 +680,9 @@ TPad * CompoundHistoUnfolding::CreateRatioGraph(RecoLevelCode_t recocode, Result
 {
   Level * level = GetLevel(resultcode);
   Level::ProjectionDeco * projdeco = level -> GetProjectionDeco(recocode);
-  TH1F * htotalMC = level -> GetHU(TOTALMC) -> Project(recocode, CreateName("totalmcrg"));
-  TH1F * htotalMCUnc = level -> GetHU(TOTALMCUNC) -> GetTH1(recocode);
-  TH1F * htotalMCUncShape = level -> GetHU(TOTALMCUNCSHAPE) -> GetTH1(recocode);
+  TH1 * htotalMC = level -> GetHU(TOTALMC) -> Project(recocode, CreateName("totalmcrg"));
+  TH1 * htotalMCUnc = level -> GetHU(TOTALMCUNC) -> GetTH1(recocode);
+  TH1 * htotalMCUncShape = level -> GetHU(TOTALMCUNCSHAPE) -> GetTH1(recocode);
   if (recocode == RECO and resultcode == IN)
     ApplyScaleFactor(htotalMC);
   NormaliseToBinWidth(htotalMC);

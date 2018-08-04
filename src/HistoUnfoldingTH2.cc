@@ -15,6 +15,7 @@ HistoUnfoldingTH2::HistoUnfoldingTH2(HistoUnfoldingTH2 *h, const char * name): _
 
 HistoUnfoldingTH2::HistoUnfoldingTH2(const char* name, const char* title, Int_t nbinsx, const Float_t* xbins, Int_t nbinsy, const Float_t* ybins, SampleDescriptor * sd): HistoUnfolding(sd)
 {
+  //  printf("Calling HistoUnfoldingTH2::HistoUnfoldingTH2(const char* name, const char* title, Int_t nbinsx, const Float_t* xbins, Int_t nbinsy, const Float_t* ybins, SampleDescriptor * sd): HistoUnfolding(sd)\n");
   _th2 = new TH2F(TString(name) + "_" + GetTag(), title, nbinsx, xbins, nbinsy, ybins);
   _th2 -> SetDirectory(nullptr);
 }
@@ -28,8 +29,8 @@ HistoUnfoldingTH2::HistoUnfoldingTH2(const char * name, const char* title, Int_t
 void HistoUnfoldingTH2::FillFromTree(const char * sampletag, const char * jettag, const char *chargetag, const char * observable)
 {
   TChain chain("migration");
-  chain.Add(TString("$EOS/analysis_") + sampletag + ("/migration_") + GetTag() + ".root/E_" + chargetag + "_" + jettag + "_" + "migration");
-  chain.Add(TString("$EOS/analysis_") + sampletag + ("/migration_") + GetTag() + ".root/M_" + chargetag + "_" + jettag + "_" + "migration");
+  chain.Add(TString("$EOS/analysis_") + sampletag + ("/HADDmigration/migration_") + GetTag() + ".root/E_" + chargetag + "_" + jettag + "_" + "migration");
+  chain.Add(TString("$EOS/analysis_") + sampletag + ("/HADDmigration/migration_") + GetTag() + ".root/M_" + chargetag + "_" + jettag + "_" + "migration");
   Float_t reco;
   Float_t gen;
   Float_t weight;
@@ -39,7 +40,8 @@ void HistoUnfoldingTH2::FillFromTree(const char * sampletag, const char * jettag
   unsigned long coinc = 0;
   using namespace std;
   //  printf("GetTag() %s %s %s\n", GetTag(), string(GetTag()).c_str(), string(GetTag()).compare("MC13TeV_TTJets") == 0? "True" : " False");
-  for (unsigned long event_ind = 0; event_ind < chain.GetEntries(); event_ind ++)
+  
+  for (unsigned long event_ind = 0; event_ind < chain.GetEntries()/10; event_ind ++)
     {
       if (event_ind % 10000 == 0)
         printf("%u\r", event_ind);
@@ -68,15 +70,15 @@ TH2F *& HistoUnfoldingTH2::GetTH2Ref()
   return _th2;
 }
 
-TH1F * HistoUnfoldingTH2::GetTH1(RecoLevelCode_t)
+TH1 * HistoUnfoldingTH2::GetTH1(RecoLevelCode_t)
 {
   throw "TH1F * HistoUnfoldingTH2::GetTH1() - no TH1F";
   return nullptr;
 }
 
-TH1F *& HistoUnfoldingTH2::GetTH1Ref(RecoLevelCode_t)
+TH1 *& HistoUnfoldingTH2::GetTH1Ref(RecoLevelCode_t)
 {
-  static TH1F * h = nullptr;
+  static TH1 * h = nullptr;
   throw "TH1F * HistoUnfoldingTH2::GetTH1Ref() - no TH1F";
   return h;
 }

@@ -6,6 +6,7 @@ ClassImp(CompoundHistoUnfolding::Level);
 
 CompoundHistoUnfolding::Level::Level(): 
 signal(nullptr), 
+signalnominal(nullptr),
 data(nullptr), 
 totalMC(nullptr), 
 totalMCUnc(nullptr), 
@@ -24,6 +25,8 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo)
       return data;
     case SIGNALMO:
       return signal;
+    case SIGNALNOMINALMO:
+      return signalnominal;
     case DATAMBCKG:
       return datambackground;
     case TOTALMC:
@@ -42,6 +45,8 @@ HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo)
     {
     case SIGNALMO:
       return signal;
+    case SIGNALNOMINALMO:
+      return signalnominal;
     case DATA:
       return data;
     case DATAMBCKG:

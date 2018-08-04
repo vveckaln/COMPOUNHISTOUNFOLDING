@@ -3,16 +3,16 @@
 #include "HistoUnfolding.hh"
 class HistoUnfoldingTH1: public HistoUnfolding
 {
-  TH1F * _th1RECO; 
-  TH1F * _th1GEN; 
+  TH1 * _th1RECO; 
+  TH1 * _th1GEN; 
 public:
   HistoUnfoldingTH1();
   HistoUnfoldingTH1(SampleDescriptor *);
   HistoUnfoldingTH1(const char* name, const char* title, Int_t nbinsx, const Float_t* xbins, SampleDescriptor *);
   HistoUnfoldingTH1(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, SampleDescriptor *);
   void FillFromTree();
-  TH1F *& GetTH1Ref(RecoLevelCode_t);
-  TH1F * GetTH1(RecoLevelCode_t);
+  TH1 *& GetTH1Ref(RecoLevelCode_t);
+  TH1 * GetTH1(RecoLevelCode_t);
   TH2F *& GetTH2Ref();
   TH2F * GetTH2();
   TH1F * Project(RecoLevelCode_t, const char * name = "" );

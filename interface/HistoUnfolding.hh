@@ -10,9 +10,9 @@ public:
   HistoUnfolding(SampleDescriptor *);
   virtual TH1F * Project(RecoLevelCode_t, const char * = "") = 0;
   virtual TH2F * GetTH2() = 0;
-  virtual TH1F * GetTH1(RecoLevelCode_t) = 0;
+  virtual TH1 * GetTH1(RecoLevelCode_t) = 0;
   virtual TH2F *& GetTH2Ref() = 0;
-  virtual TH1F *& GetTH1Ref(RecoLevelCode_t) = 0;
+  virtual TH1 *& GetTH1Ref(RecoLevelCode_t) = 0;
   virtual void lsbins(RecoLevelCode_t) = 0;
   virtual ~HistoUnfolding();
   virtual const char * WhoAmI() = 0;

@@ -298,9 +298,9 @@ void JsonParser::Test()
 
 void JsonParser::UnsetSample(unsigned long ind)
 {
-  _samples[ind] -> _tag    = 0;
-  _samples[ind] -> _title  = 0;
-  _samples[ind] -> _color  = 0;
+  _samples[ind] -> _tag    = nullptr;
+  _samples[ind] -> _title  = nullptr;
+  _samples[ind] -> _color  = nullptr;
 } 
 
 

@@ -9,7 +9,7 @@ HistoUnfoldingTH1::HistoUnfoldingTH1():  _th1RECO(nullptr), _th1GEN(nullptr)
 
 HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd):  _th1RECO(nullptr), _th1GEN(nullptr), HistoUnfolding(sd)
 {
-
+  //  printf("calling HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd)\n");
 }
 
 /*
@@ -41,7 +41,7 @@ TH1F *HistoUnfoldingTH1::Project(RecoLevelCode_t code, const char * name)
   return proj;
 }
 
-TH1F *& HistoUnfoldingTH1::GetTH1Ref(RecoLevelCode_t code)
+TH1 *& HistoUnfoldingTH1::GetTH1Ref(RecoLevelCode_t code)
 {
   switch (code)
     {
@@ -52,7 +52,7 @@ TH1F *& HistoUnfoldingTH1::GetTH1Ref(RecoLevelCode_t code)
     }
 }
 
-TH1F * HistoUnfoldingTH1::GetTH1(RecoLevelCode_t code)
+TH1 * HistoUnfoldingTH1::GetTH1(RecoLevelCode_t code)
 {
   switch (code)
     {
@@ -79,7 +79,7 @@ TH2F *& HistoUnfoldingTH1::GetTH2Ref()
 void HistoUnfoldingTH1::lsbins(RecoLevelCode_t recocode)
 {
   printf("listing bins of %s recocode %s\n", GetTitle(), tag_recolevel[recocode]);
-  TH1F * h = GetTH1(recocode);
+  TH1 * h = GetTH1(recocode);
   const unsigned short nbins = h -> GetNbinsX();
   for (unsigned char bin_ind = 0; bin_ind < nbins + 2; bin_ind ++)
     {

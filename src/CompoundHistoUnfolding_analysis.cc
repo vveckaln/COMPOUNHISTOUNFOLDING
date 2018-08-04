@@ -6,6 +6,7 @@ ClassImp(CompoundHistoUnfolding)
 void CompoundHistoUnfolding::PullAnalysis()
 {
   TH2F *histMdetGenMC = (TH2F*) GetLevel(IN) -> GetHU(SIGNALMO) -> GetTH2() -> Clone(CreateName("histMdetGenmc")); 
+  histMdetGenMC -> SetDirectory(nullptr);
   histMdetGenMC -> RebinX(2);
   const double integral = histMdetGenMC -> Integral(0, -1, 0, -1);
   const double nExpectedEvents = integral;
@@ -20,6 +21,7 @@ void CompoundHistoUnfolding::PullAnalysis()
   for (unsigned int t = 0; t < nToys; ++t) 
     {
       TH2D* histMdetGenToy = (TH2D*) histMdetGenMC -> Clone(CreateName("histMdetGenToy"));
+      histMdetGenToy -> SetDirectory(nullptr);
       histMdetGenToy -> Reset();
     
       unsigned int drawn = 0;
@@ -32,7 +34,8 @@ void CompoundHistoUnfolding::PullAnalysis()
 	  ++drawn;
 	}
       TH1D *histMgenToy = histMdetGenToy -> ProjectionY(CreateName("histMgenToy"));
-      TH1F * histMunfold = GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1(GEN);
+      histMgenToy -> SetDirectory(nullptr);
+      TH1 * histMunfold = GetLevel(OUT) -> GetHU(SIGNALMO) -> GetTH1(GEN);
       float pull_max = 0.0;
       for (int i = 1; i < histMunfold -> GetNbinsX() + 1; ++i) 
 	{
@@ -94,6 +97,7 @@ void CompoundHistoUnfolding::PullAnalysis()
 
   cstabpur -> SaveAs(TString(_folder) + "/" + "/stabpur.png");
   TH2D* hpurity2D = (TH2D*) histsig -> Clone(CreateName("purity2D"));
+  hpurity2D -> SetDirectory(nullptr);
   hpurity2D -> RebinX(2);
   hpurity2D -> SetTitle(CreateTitle("purity"));
 
@@ -199,18 +203,36 @@ HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, co
 void CompoundHistoUnfolding::createCov()
 {
   const ResultLevelCode_t resultlevel = OUT;
+  //  TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALNOMINALMO) -> Project(GEN, "hsignal");
   TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALMO) -> Project(GEN, "hsignal");
+  hdsignal -> SetDirectory(nullptr);
+  hdsignal -> Scale(1.0/hdsignal -> Integral());
   //NormaliseToBinWidth(hdsignal);
-  const unsigned char nbins = hdsignal -> GetNbinsX();
+  const unsigned char nbins = hdsignal -> GetNbinsX() - 1;
   GetLevel(resultlevel) -> cov = new TMatrixD(nbins, nbins);
   GetLevel(resultlevel) -> cov -> Zero();
-  GetLevel(resultlevel) -> cov -> Print();
+  //  GetLevel(resultlevel) -> cov -> Print();
+  unsigned char ind = 0;
   for (vector<SampleDescriptor *>::iterator it = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
     {
+      //      if (ind > 0)
+      //break;
+      ind ++;
+      //printf("*************\n");
       TH1F * hsysdown = GetExpSys(resultlevel, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
+      hsysdown -> SetDirectory(nullptr);
       TH1F * hsysup = GetExpSys(resultlevel, (*it) -> GetTag(), UP) -> Project(GEN, "up");
+      hsysup -> SetDirectory(nullptr);
+      
+      hsysdown -> Scale(1.0/hsysdown -> Integral());
+      hsysup -> Scale(1.0/hsysup -> Integral());
       //      NormaliseToBinWidth(hsysdown);
       //NormaliseToBinWidth(hsysup);
+      const double meany1 = 0.5 * (hsysup -> GetBinContent(1) + hsysdown -> GetBinContent(1));
+      const double meany2 = 0.5 * (hsysup -> GetBinContent(2) + hsysdown -> GetBinContent(2));
+      const double cov1 = hsysdown -> GetBinContent(1) - meany1;
+      const double cov2 = hsysdown -> GetBinContent(2) - meany2;
+      //     printf("meany1 %f cov1 %f meany2 %.9f cov2 %.9f ch1 %.9f ch2 %.9f \n", meany1, cov1, meany2, cov2, 0.5 * (hsysdown -> GetBinContent(1) - hsysup -> GetBinContent(1)), 0.5 * (hsysdown -> GetBinContent(2) - hsysup -> GetBinContent(2)));
       for (unsigned char xind = 1; xind < nbins + 1; xind ++)
 	{
 	  TH1F * hxmax = 
@@ -229,6 +251,7 @@ void CompoundHistoUnfolding::createCov()
 	      const float meany = 0.5 * (hsysup -> GetBinContent(yind) + hsysdown -> GetBinContent(yind));
 	      const float cov = (hsysup  -> GetBinContent(xind) - meanx) * (hsysup  -> GetBinContent(yind) - meany) +
 		(hsysdown  -> GetBinContent(xind) - meanx) * (hsysdown  -> GetBinContent(yind) - meany);
+	      //      printf("xind %u yind %u  meanx %f meany y %f up(xind) %f up(yind) %f down(xind) %f down(yind) %f cov %.12f\n", xind, yind, meanx, meany, hsysup  -> GetBinContent(xind), hsysup  -> GetBinContent(yind), hsysdown  -> GetBinContent(xind), hsysdown  -> GetBinContent(yind), cov);
 	      char sign = 0.0;
 	      if (cov > 0.0)
 		{
@@ -247,7 +270,9 @@ void CompoundHistoUnfolding::createCov()
   for (vector<SampleDescriptor *>::iterator it = _markedsyssamples.begin(); it != _markedsyssamples.end(); it ++)
     {
       TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag()) -> Project(GEN, "markedsys");
-      NormaliseToBinWidth(hsys);
+      hsys -> SetDirectory(nullptr);
+      //      NormaliseToBinWidth(hsys);
+      hsys -> Scale(1.0 / hsys -> Integral());
       for (unsigned char xind = 1; xind < nbins + 1; xind ++)
 	{
 	  const float meanx = 0.5 * (hsys -> GetBinContent(xind) + hdsignal -> GetBinContent(xind));
@@ -270,11 +295,16 @@ void CompoundHistoUnfolding::createCov()
 
 double CompoundHistoUnfolding::GetChi() 
 {
-  TH1F * hdata = GetLevel(OUT) -> GetHU(SIGNALMO) -> Project(GEN, "hdata");
+  
+  TH1F * hdata = GetLevel(OUT) -> GetHU(SIGNALNOMINALMO) -> Project(GEN, "hdata");
+  hdata -> SetDirectory(nullptr);
   TH1F * hmodel = GetLevel(IN) -> GetHU(SIGNALMO) -> Project(GEN, "hmodel");
+  hmodel -> SetDirectory(nullptr);
+  hdata -> Scale(1.0/hdata -> Integral());
+  hmodel -> Scale(1.0/hmodel -> Integral());
   //NormaliseToBinWidth(hdata);
   //NormaliseToBinWidth(hmodel);
-  const char nbins = hmodel -> GetNbinsX();
+  const char nbins = hmodel -> GetNbinsX() - 1;
   TMatrixD D(nbins, 1);
   for (unsigned char bin_ind = 1; bin_ind < nbins + 1; bin_ind ++)
     {
@@ -285,10 +315,12 @@ double CompoundHistoUnfolding::GetChi()
   TMatrixD DTr(1, nbins);
   DTr = DTr.Transpose(D);
   //DTr.Print();
-  TMatrixD inv = GetLevel(OUT) -> cov -> Invert();
-  //inv.Print();
+  printf("inverted matrix\n");
+  TMatrixD inv(GetLevel(OUT) -> cov -> Invert());
+  inv.Print();
   TMatrixD  A(1, nbins);
   A.Mult(DTr, inv);
+  
   TMatrixD chi(1, 1);
   printf("chi:\n");
   chi.Mult(A, D);

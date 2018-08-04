@@ -11,8 +11,8 @@ public:
   HistoUnfoldingTH2(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, SampleDescriptor *);
   TH2F * GetTH2();
   TH2F *& GetTH2Ref();
-  TH1F * GetTH1(RecoLevelCode_t);
-  TH1F *& GetTH1Ref(RecoLevelCode_t);
+  TH1 * GetTH1(RecoLevelCode_t);
+  TH1 *& GetTH1Ref(RecoLevelCode_t);
   TH1F * Project(RecoLevelCode_t, const char * name = "");
   void FillFromTree(const char * sampletag, const char * jettag, const char *chargetag, const char * observable);
   const char * WhoAmI();

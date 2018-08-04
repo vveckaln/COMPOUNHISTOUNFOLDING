@@ -7,13 +7,15 @@ class SampleDescriptor: public TNamed
   friend class JsonParser;
   void PruneStringsFromQuotes();
   int                       size; 
+  int                       size_color;
   float                    _xsec;
   char                   * _title; ///< [size];
   char                   * _tag; ///< [size];
-  char                   * _color; ///< [size];
+  char                   * _color; ///< [size_color];
   SampleTypeCode_t         _sample_type;
   SysTypeCode_t            _sys_type;
 public:
+  void Unset();
   unsigned char            _colornum;
   const char * GetTitle() const;
   const char * GetTag() const;
@@ -27,11 +29,12 @@ public:
   void SetTag(const char *);
   void SetColor(const char *);
   void SetSampleType(SampleTypeCode_t);
-  void SetSysTypeCode(SysTypeCode_t);
+  void SetSysType(SysTypeCode_t);
   void ls(Option_t * = "") const;
   virtual ~SampleDescriptor();
   SampleDescriptor();
-  SampleDescriptor(SampleDescriptor *);
+  //  SampleDescriptor(SampleDescriptor *);
+  SampleDescriptor(SampleDescriptor &);
   ClassDef(SampleDescriptor, 1)
 };
 #endif
