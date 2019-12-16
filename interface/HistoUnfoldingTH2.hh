@@ -13,7 +13,7 @@ public:
   TH2F *& GetTH2Ref();
   TH1 * GetTH1(RecoLevelCode_t);
   TH1 *& GetTH1Ref(RecoLevelCode_t);
-  TH1F * Project(RecoLevelCode_t, const char * name = "");
+  TH1F * Project(RecoLevelCode_t, const char * name = "", const char * XaxisTitle = "", const char * YaxisTitle = "");
   void FillFromTree(const char * sampletag, const char * jettag, const char *chargetag, const char * observable);
   const char * WhoAmI();
   void lsbins(RecoLevelCode_t);

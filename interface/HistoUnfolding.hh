@@ -8,7 +8,7 @@ class HistoUnfolding: public SampleDescriptor
 public:
   HistoUnfolding();
   HistoUnfolding(SampleDescriptor *);
-  virtual TH1F * Project(RecoLevelCode_t, const char * = "") = 0;
+  virtual TH1F * Project(RecoLevelCode_t, const char * = "", const char * XaxisTitle = "", const char * YaxisTitle = "") = 0;
   virtual TH2F * GetTH2() = 0;
   virtual TH1 * GetTH1(RecoLevelCode_t) = 0;
   virtual TH2F *& GetTH2Ref() = 0;

@@ -6,7 +6,7 @@ ClassImp(CompoundHistoUnfolding::Level);
 
 CompoundHistoUnfolding::Level::Level(): 
 signal(nullptr), 
-signalnominal(nullptr),
+//signalnominal(nullptr),
 data(nullptr), 
 totalMC(nullptr), 
 totalMCUnc(nullptr), 
@@ -17,7 +17,7 @@ cov(nullptr)
 
 }
 
-HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo)
+HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo , ResultLevelCode_t resultcode)
 {
   switch(mo)
     {
@@ -25,8 +25,8 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo)
       return data;
     case SIGNALMO:
       return signal;
-    case SIGNALNOMINALMO:
-      return signalnominal;
+    // case SIGNALNOMINALMO:
+    //   return signalnominal;
     case DATAMBCKG:
       return datambackground;
     case TOTALMC:
@@ -35,18 +35,41 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo)
       return totalMCUnc;
     case TOTALMCUNCSHAPE:
       return totalMCUncShape;
+    case SIGNALPROXY:
+      switch(resultcode)
+	{
+	case IN:
+	  return signal;
+	case OUT:
+	  return datambackground;
+	default:
+	  printf("HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) no resultcode provided\n"); 
+	  throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) no resultcode provided\n"; 
+	}
+    case TOTALMCSIGNALPROXY:
+      switch(resultcode)
+	{
+	case IN:
+	  return totalMC;
+	case OUT:
+	  return data;
+	default:
+	  printf("HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) no resultcode provided\n"); 
+	  throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) no resultcode provided\n"; 
+	}
     default:
+      printf("HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect %u\n", mo);
       throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect\n";
     }
 }
-HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo)
+HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo, ResultLevelCode_t resultcode)
 {
   switch(mo)
     {
     case SIGNALMO:
       return signal;
-    case SIGNALNOMINALMO:
-      return signalnominal;
+    // case SIGNALNOMINALMO:
+    //   return signalnominal;
     case DATA:
       return data;
     case DATAMBCKG:
@@ -57,6 +80,22 @@ HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo)
       return totalMCUnc;
     case TOTALMCUNCSHAPE:
       return totalMCUncShape;
+    case SIGNALPROXY:
+      switch(resultcode)
+	{
+	case IN:
+	  return signal;
+	case OUT:
+	  return datambackground;
+	}
+    case TOTALMCSIGNALPROXY:
+      switch(resultcode)
+	{
+	case IN:
+	  return totalMC;
+	case OUT:
+	  return data;
+	}
     default:
       char e[256];
      
@@ -81,6 +120,31 @@ vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo)
       return nullptr;
     }
 }
+
+HistoUnfolding * CompoundHistoUnfolding::Level::GetInputHU(MOCode_t mo, const char * name)
+{
+  vector<HistoUnfolding *> * v = GetV(mo);
+  vector<HistoUnfolding *> ::iterator it = v -> begin(); 
+  while( it != v -> end() and TString((*it) -> GetTag()) != name)
+    {
+      it ++;
+    }
+  if (it == v -> end())
+    return nullptr;
+  else return *it;
+}
+
+void CompoundHistoUnfolding::Level::lsInputHU(MOCode_t mo)
+{
+  vector<HistoUnfolding *> * v = GetV(mo);
+  vector<HistoUnfolding *> ::iterator it = v -> begin(); 
+  while( it != v -> end() )
+    {
+      (*it) -> ls();
+      it ++;
+    }
+}
+
 
 CompoundHistoUnfolding::Level::ProjectionDeco * CompoundHistoUnfolding::Level::GetProjectionDeco(RecoLevelCode_t recocode)
 {

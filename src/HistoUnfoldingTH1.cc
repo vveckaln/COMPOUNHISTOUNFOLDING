@@ -12,6 +12,15 @@ HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd):  _th1RECO(nullptr),
   //  printf("calling HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd)\n");
 }
 
+HistoUnfoldingTH1::HistoUnfoldingTH1(HistoUnfoldingTH1 *h, const char * name): 
+_th1RECO((TH1F*) h -> GetTH1(RECO) -> Clone(TString(name) + "_reco")), 
+_th1GEN((TH1F*) h -> GetTH1(GEN) -> Clone(TString(name) + "_gen")), 
+HistoUnfolding((SampleDescriptor*) h)
+{
+
+}
+
+
 /*
 HistoUnfoldingTH1::HistoUnfoldingTH1(const char* name, const char* title, Int_t nbins, const Float_t* xbins, SampleDescriptor * sd): SampleDescriptor(*sd)
 {
@@ -23,7 +32,7 @@ HistoUnfoldingTH1::HistoUnfoldingTH1(const char * name, const char* title, Int_t
   _th1 = new TH1F(TString(name) + "_" + _tag, title, nbinsx, xlow, xup);
 }
 */
-TH1F *HistoUnfoldingTH1::Project(RecoLevelCode_t code, const char * name)
+TH1F *HistoUnfoldingTH1::Project(RecoLevelCode_t code, const char * name, const char * XaxisTitle, const char * YaxisTitle)
 {
   const TString namestr = TString(name) + tag_recolevel[code];
   TH1F * proj = nullptr;
@@ -38,6 +47,8 @@ TH1F *HistoUnfoldingTH1::Project(RecoLevelCode_t code, const char * name)
       proj -> SetDirectory(nullptr);
       break;
     }
+  proj -> GetXaxis() -> SetTitle(XaxisTitle);
+  proj -> GetYaxis() -> SetTitle(YaxisTitle);
   return proj;
 }
 

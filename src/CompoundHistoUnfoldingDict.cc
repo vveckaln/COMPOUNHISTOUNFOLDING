@@ -55,7 +55,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 22,
+         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 24,
                   typeid(::CompoundHistoUnfolding), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding) );
@@ -87,7 +87,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding::Level *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding::Level", ::CompoundHistoUnfolding::Level::Class_Version(), "interface/CompoundHistoUnfolding.hh", 59,
+         instance("CompoundHistoUnfolding::Level", ::CompoundHistoUnfolding::Level::Class_Version(), "interface/CompoundHistoUnfolding.hh", 71,
                   typeid(::CompoundHistoUnfolding::Level), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Level::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding::Level) );
@@ -119,7 +119,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding::Level::ProjectionDeco *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level::ProjectionDeco >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 77,
+         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 91,
                   typeid(::CompoundHistoUnfolding::Level::ProjectionDeco), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Level::ProjectionDeco::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding::Level::ProjectionDeco) );
@@ -341,6 +341,69 @@ namespace ROOT {
       ((current_t*)p)->~current_t();
    }
 } // end of namespace ROOT for class ::CompoundHistoUnfolding::Level::ProjectionDeco
+
+namespace ROOT {
+   static TClass *vectorlETObjectmUgR_Dictionary();
+   static void vectorlETObjectmUgR_TClassManip(TClass*);
+   static void *new_vectorlETObjectmUgR(void *p = 0);
+   static void *newArray_vectorlETObjectmUgR(Long_t size, void *p);
+   static void delete_vectorlETObjectmUgR(void *p);
+   static void deleteArray_vectorlETObjectmUgR(void *p);
+   static void destruct_vectorlETObjectmUgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<TObject*>*)
+   {
+      vector<TObject*> *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<TObject*>));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<TObject*>", -2, "vector", 214,
+                  typeid(vector<TObject*>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlETObjectmUgR_Dictionary, isa_proxy, 0,
+                  sizeof(vector<TObject*>) );
+      instance.SetNew(&new_vectorlETObjectmUgR);
+      instance.SetNewArray(&newArray_vectorlETObjectmUgR);
+      instance.SetDelete(&delete_vectorlETObjectmUgR);
+      instance.SetDeleteArray(&deleteArray_vectorlETObjectmUgR);
+      instance.SetDestructor(&destruct_vectorlETObjectmUgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<TObject*> >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const vector<TObject*>*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlETObjectmUgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const vector<TObject*>*)0x0)->GetClass();
+      vectorlETObjectmUgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlETObjectmUgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlETObjectmUgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<TObject*> : new vector<TObject*>;
+   }
+   static void *newArray_vectorlETObjectmUgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<TObject*>[nElements] : new vector<TObject*>[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlETObjectmUgR(void *p) {
+      delete ((vector<TObject*>*)p);
+   }
+   static void deleteArray_vectorlETObjectmUgR(void *p) {
+      delete [] ((vector<TObject*>*)p);
+   }
+   static void destruct_vectorlETObjectmUgR(void *p) {
+      typedef vector<TObject*> current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class vector<TObject*>
 
 namespace ROOT {
    static TClass *vectorlESampleDescriptormUgR_Dictionary();
