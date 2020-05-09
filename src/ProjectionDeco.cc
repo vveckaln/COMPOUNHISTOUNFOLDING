@@ -69,7 +69,7 @@ void CompoundHistoUnfolding::Level::ProjectionDeco::Format()
       legend -> SetBorderSize(0);
       legend -> SetFillStyle(0);
       legend -> SetTextFont(42);
-      legend -> SetTextSize(0.05);
+      legend -> SetTextSize(0.04);
     }
 }
 

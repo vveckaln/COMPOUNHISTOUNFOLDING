@@ -119,7 +119,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding::Level::ProjectionDeco *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level::ProjectionDeco >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 91,
+         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 100,
                   typeid(::CompoundHistoUnfolding::Level::ProjectionDeco), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Level::ProjectionDeco::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding::Level::ProjectionDeco) );
@@ -343,6 +343,69 @@ namespace ROOT {
 } // end of namespace ROOT for class ::CompoundHistoUnfolding::Level::ProjectionDeco
 
 namespace ROOT {
+   static TClass *vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_Dictionary();
+   static void vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_TClassManip(TClass*);
+   static void *new_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p = 0);
+   static void *newArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(Long_t size, void *p);
+   static void delete_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p);
+   static void deleteArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p);
+   static void destruct_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<array<HistoUnfolding*,2> >*)
+   {
+      vector<array<HistoUnfolding*,2> > *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<array<HistoUnfolding*,2> >));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<array<HistoUnfolding*,2> >", -2, "vector", 214,
+                  typeid(vector<array<HistoUnfolding*,2> >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_Dictionary, isa_proxy, 0,
+                  sizeof(vector<array<HistoUnfolding*,2> >) );
+      instance.SetNew(&new_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR);
+      instance.SetNewArray(&newArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR);
+      instance.SetDelete(&delete_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR);
+      instance.SetDeleteArray(&deleteArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR);
+      instance.SetDestructor(&destruct_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<array<HistoUnfolding*,2> > >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const vector<array<HistoUnfolding*,2> >*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const vector<array<HistoUnfolding*,2> >*)0x0)->GetClass();
+      vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlEarraylEHistoUnfoldingmUcO2gRsPgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<array<HistoUnfolding*,2> > : new vector<array<HistoUnfolding*,2> >;
+   }
+   static void *newArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) vector<array<HistoUnfolding*,2> >[nElements] : new vector<array<HistoUnfolding*,2> >[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p) {
+      delete ((vector<array<HistoUnfolding*,2> >*)p);
+   }
+   static void deleteArray_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p) {
+      delete [] ((vector<array<HistoUnfolding*,2> >*)p);
+   }
+   static void destruct_vectorlEarraylEHistoUnfoldingmUcO2gRsPgR(void *p) {
+      typedef vector<array<HistoUnfolding*,2> > current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class vector<array<HistoUnfolding*,2> >
+
+namespace ROOT {
    static TClass *vectorlETObjectmUgR_Dictionary();
    static void vectorlETObjectmUgR_TClassManip(TClass*);
    static void *new_vectorlETObjectmUgR(void *p = 0);
@@ -530,6 +593,195 @@ namespace ROOT {
       ((current_t*)p)->~current_t();
    }
 } // end of namespace ROOT for class vector<HistoUnfolding*>
+
+namespace ROOT {
+   static TClass *maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_Dictionary();
+   static void maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_TClassManip(TClass*);
+   static void *new_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p = 0);
+   static void *newArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(Long_t size, void *p);
+   static void delete_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p);
+   static void deleteArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p);
+   static void destruct_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const map<TString,vector<array<HistoUnfolding*,2> > >*)
+   {
+      map<TString,vector<array<HistoUnfolding*,2> > > *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(map<TString,vector<array<HistoUnfolding*,2> > >));
+      static ::ROOT::TGenericClassInfo 
+         instance("map<TString,vector<array<HistoUnfolding*,2> > >", -2, "map", 96,
+                  typeid(map<TString,vector<array<HistoUnfolding*,2> > >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_Dictionary, isa_proxy, 0,
+                  sizeof(map<TString,vector<array<HistoUnfolding*,2> > >) );
+      instance.SetNew(&new_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR);
+      instance.SetNewArray(&newArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR);
+      instance.SetDelete(&delete_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR);
+      instance.SetDeleteArray(&deleteArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR);
+      instance.SetDestructor(&destruct_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::MapInsert< map<TString,vector<array<HistoUnfolding*,2> > > >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const map<TString,vector<array<HistoUnfolding*,2> > >*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const map<TString,vector<array<HistoUnfolding*,2> > >*)0x0)->GetClass();
+      maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<array<HistoUnfolding*,2> > > : new map<TString,vector<array<HistoUnfolding*,2> > >;
+   }
+   static void *newArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<array<HistoUnfolding*,2> > >[nElements] : new map<TString,vector<array<HistoUnfolding*,2> > >[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p) {
+      delete ((map<TString,vector<array<HistoUnfolding*,2> > >*)p);
+   }
+   static void deleteArray_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p) {
+      delete [] ((map<TString,vector<array<HistoUnfolding*,2> > >*)p);
+   }
+   static void destruct_maplETStringcOvectorlEarraylEHistoUnfoldingmUcO2gRsPgRsPgR(void *p) {
+      typedef map<TString,vector<array<HistoUnfolding*,2> > > current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class map<TString,vector<array<HistoUnfolding*,2> > >
+
+namespace ROOT {
+   static TClass *maplETStringcOvectorlESampleDescriptormUgRsPgR_Dictionary();
+   static void maplETStringcOvectorlESampleDescriptormUgRsPgR_TClassManip(TClass*);
+   static void *new_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p = 0);
+   static void *newArray_maplETStringcOvectorlESampleDescriptormUgRsPgR(Long_t size, void *p);
+   static void delete_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p);
+   static void deleteArray_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p);
+   static void destruct_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const map<TString,vector<SampleDescriptor*> >*)
+   {
+      map<TString,vector<SampleDescriptor*> > *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(map<TString,vector<SampleDescriptor*> >));
+      static ::ROOT::TGenericClassInfo 
+         instance("map<TString,vector<SampleDescriptor*> >", -2, "map", 96,
+                  typeid(map<TString,vector<SampleDescriptor*> >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &maplETStringcOvectorlESampleDescriptormUgRsPgR_Dictionary, isa_proxy, 0,
+                  sizeof(map<TString,vector<SampleDescriptor*> >) );
+      instance.SetNew(&new_maplETStringcOvectorlESampleDescriptormUgRsPgR);
+      instance.SetNewArray(&newArray_maplETStringcOvectorlESampleDescriptormUgRsPgR);
+      instance.SetDelete(&delete_maplETStringcOvectorlESampleDescriptormUgRsPgR);
+      instance.SetDeleteArray(&deleteArray_maplETStringcOvectorlESampleDescriptormUgRsPgR);
+      instance.SetDestructor(&destruct_maplETStringcOvectorlESampleDescriptormUgRsPgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::MapInsert< map<TString,vector<SampleDescriptor*> > >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const map<TString,vector<SampleDescriptor*> >*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *maplETStringcOvectorlESampleDescriptormUgRsPgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const map<TString,vector<SampleDescriptor*> >*)0x0)->GetClass();
+      maplETStringcOvectorlESampleDescriptormUgRsPgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void maplETStringcOvectorlESampleDescriptormUgRsPgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<SampleDescriptor*> > : new map<TString,vector<SampleDescriptor*> >;
+   }
+   static void *newArray_maplETStringcOvectorlESampleDescriptormUgRsPgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<SampleDescriptor*> >[nElements] : new map<TString,vector<SampleDescriptor*> >[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p) {
+      delete ((map<TString,vector<SampleDescriptor*> >*)p);
+   }
+   static void deleteArray_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p) {
+      delete [] ((map<TString,vector<SampleDescriptor*> >*)p);
+   }
+   static void destruct_maplETStringcOvectorlESampleDescriptormUgRsPgR(void *p) {
+      typedef map<TString,vector<SampleDescriptor*> > current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class map<TString,vector<SampleDescriptor*> >
+
+namespace ROOT {
+   static TClass *maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_Dictionary();
+   static void maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_TClassManip(TClass*);
+   static void *new_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p = 0);
+   static void *newArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(Long_t size, void *p);
+   static void delete_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p);
+   static void deleteArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p);
+   static void destruct_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const map<TString,vector<HistoUnfolding*> >*)
+   {
+      map<TString,vector<HistoUnfolding*> > *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(map<TString,vector<HistoUnfolding*> >));
+      static ::ROOT::TGenericClassInfo 
+         instance("map<TString,vector<HistoUnfolding*> >", -2, "map", 96,
+                  typeid(map<TString,vector<HistoUnfolding*> >), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_Dictionary, isa_proxy, 0,
+                  sizeof(map<TString,vector<HistoUnfolding*> >) );
+      instance.SetNew(&new_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR);
+      instance.SetNewArray(&newArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR);
+      instance.SetDelete(&delete_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR);
+      instance.SetDeleteArray(&deleteArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR);
+      instance.SetDestructor(&destruct_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::MapInsert< map<TString,vector<HistoUnfolding*> > >()));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_(Init) = GenerateInitInstanceLocal((const map<TString,vector<HistoUnfolding*> >*)0x0); R__UseDummy(_R__UNIQUE_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const map<TString,vector<HistoUnfolding*> >*)0x0)->GetClass();
+      maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void maplETStringcOvectorlEHistoUnfoldingmUgRsPgR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p) {
+      return  p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<HistoUnfolding*> > : new map<TString,vector<HistoUnfolding*> >;
+   }
+   static void *newArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(Long_t nElements, void *p) {
+      return p ? ::new((::ROOT::Internal::TOperatorNewHelper*)p) map<TString,vector<HistoUnfolding*> >[nElements] : new map<TString,vector<HistoUnfolding*> >[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p) {
+      delete ((map<TString,vector<HistoUnfolding*> >*)p);
+   }
+   static void deleteArray_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p) {
+      delete [] ((map<TString,vector<HistoUnfolding*> >*)p);
+   }
+   static void destruct_maplETStringcOvectorlEHistoUnfoldingmUgRsPgR(void *p) {
+      typedef map<TString,vector<HistoUnfolding*> > current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class map<TString,vector<HistoUnfolding*> >
 
 namespace ROOT {
    static TClass *maplETStringcOHistoUnfoldingmUgR_Dictionary();

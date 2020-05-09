@@ -76,6 +76,7 @@ TH1 * HistoUnfoldingTH1::GetTH1(RecoLevelCode_t code)
 
 TH2F * HistoUnfoldingTH1::GetTH2()
 {
+  printf("TH2F *& HistoUnfoldingTH1::GetTH2(RecoLevelCode_t code) - no TH2FF");
   throw "TH2F *& HistoUnfoldingTH1::GetTH2(RecoLevelCode_t code) - no TH2F";
   return nullptr;
 }
@@ -83,6 +84,7 @@ TH2F * HistoUnfoldingTH1::GetTH2()
 TH2F *& HistoUnfoldingTH1::GetTH2Ref()
 {
   static TH2F * h = nullptr;
+  printf("TH2F *& HistoUnfoldingTH1::GetTH2Ref(RecoLevelCode_t code) - no TH2F");
   throw "TH2F *& HistoUnfoldingTH1::GetTH2Ref(RecoLevelCode_t code) - no TH2F";
   return h;
 }
@@ -106,5 +108,8 @@ const char * HistoUnfoldingTH1::WhoAmI()
 
 HistoUnfoldingTH1::~HistoUnfoldingTH1()
 {
-
+  if (GetTH1(RECO))
+    delete GetTH1(RECO);
+  if (GetTH1(GEN))
+    delete (GetTH1(GEN));
 }

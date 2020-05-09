@@ -7,11 +7,11 @@ using namespace std;
 class JsonParser
 {
   vector<SampleDescriptor *> _samples;
-  void ParseSample(const char*, SampleDescriptor &, SysTypeCode_t = NOMINAL);
+  void ParseSample(const char*, SampleDescriptor &, SysTypeCode_t = NOMINAL, const char * sampletag =  nullptr);
   char _signal_tag[64];
 public:
   void SetSignalTag(const char *);
-  void Load(const char *, SysTypeCode_t = NOMINAL);
+  void Load(const char *, SysTypeCode_t = NOMINAL, const char * sampletag =  nullptr);
   void ls();
   unsigned long GetSize();
   const char * GetTag(unsigned long);
@@ -22,6 +22,7 @@ public:
   void Test();
   void UnsetSample(unsigned long);
   SampleDescriptor * GetSample(unsigned long);
+  vector<SampleDescriptor *> * GetSamplesV();
   ~JsonParser();
 };
 

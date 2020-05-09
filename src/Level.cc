@@ -58,8 +58,10 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetHU(MOCode_t mo , ResultLevelC
 	  throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) no resultcode provided\n"; 
 	}
     default:
-      printf("HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect %u\n", mo);
-      throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect\n";
+      {
+	printf("HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect %u\n", mo);
+	throw "HistoUnfolding *& CompoundHistoUnfolding::Level::GetHU(MOCode_t mo) - MO code incorrect\n";
+      }
     }
 }
 HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo, ResultLevelCode_t resultcode)
@@ -105,7 +107,7 @@ HistoUnfolding *& CompoundHistoUnfolding::Level::GetHURef(MOCode_t mo, ResultLev
     }
 }
 
-vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo)
+vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo, const char * signal)
 {
   switch(mo)
     {
@@ -114,16 +116,22 @@ vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo)
     case DATA:
       return & _vdatahistos;
     case SYSMO:
-      return & _vsyshistos;
+      if (signal == nullptr)
+	{
+	  printf("vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo, const char * signaltag): please provide signaltag when extracting systematic\n");
+	  throw "vector<HistoUnfolding *> * CompoundHistoUnfolding::Level::GetV(MOCode_t mo, const char * signaltag): please provide signaltag when extracting systematic\n";
+	}
+      return & _msyshistos[signal];
+	
     default:
       throw "HistoUnfolding *& CompoundHistoUnfolding::Level::Measurements::GetV(MOCode_t mo) - MO code incorrect\n";
       return nullptr;
     }
 }
 
-HistoUnfolding * CompoundHistoUnfolding::Level::GetInputHU(MOCode_t mo, const char * name)
+HistoUnfolding * CompoundHistoUnfolding::Level::GetInputHU(MOCode_t mo, const char * name, const char * sample)
 {
-  vector<HistoUnfolding *> * v = GetV(mo);
+  vector<HistoUnfolding *> * v = GetV(mo, sample);
   vector<HistoUnfolding *> ::iterator it = v -> begin(); 
   while( it != v -> end() and TString((*it) -> GetTag()) != name)
     {
@@ -134,9 +142,9 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetInputHU(MOCode_t mo, const ch
   else return *it;
 }
 
-void CompoundHistoUnfolding::Level::lsInputHU(MOCode_t mo)
+void CompoundHistoUnfolding::Level::lsInputHU(MOCode_t mo, const char * sample)
 {
-  vector<HistoUnfolding *> * v = GetV(mo);
+  vector<HistoUnfolding *> * v = GetV(mo, sample);
   vector<HistoUnfolding *> ::iterator it = v -> begin(); 
   while( it != v -> end() )
     {
@@ -186,18 +194,156 @@ void CompoundHistoUnfolding::Level::Format()
       GetHU(TOTALMCUNC) -> GetTH1(GEN) ->  SetFillColor(TColor::GetColor("#99d8c9"));
       GetHU(TOTALMCUNC) -> GetTH1(GEN) ->  SetFillStyle(3254);
     }
-  if (GetHU(TOTALMCUNCSHAPE) -> GetTH1(RECO))
+  if (GetHU(TOTALMCUNCSHAPE) and GetHU(TOTALMCUNCSHAPE) -> GetTH1(RECO))
     {
 
       GetHU(TOTALMCUNCSHAPE) -> GetTH1(RECO) ->  SetFillColor(TColor::GetColor("#d73027"));
       GetHU(TOTALMCUNCSHAPE) -> GetTH1(RECO) ->  SetFillStyle(3254);
     }
-  if (GetHU(TOTALMCUNCSHAPE) -> GetTH1(GEN))
+  if (GetHU(TOTALMCUNCSHAPE) and GetHU(TOTALMCUNCSHAPE) -> GetTH1(GEN))
     {
 
       GetHU(TOTALMCUNCSHAPE) -> GetTH1(GEN) ->  SetFillColor(TColor::GetColor("#d73027"));
       GetHU(TOTALMCUNCSHAPE) -> GetTH1(GEN) ->  SetFillStyle(3254);
     }
+}
+
+void CompoundHistoUnfolding::Level::SeparateSys()
+{
+  _m2dirsyshistos.clear();
+  _m1dirsyshistos.clear();
+  for (map<TString, vector<HistoUnfolding *>>:: iterator bit = _msyshistos.begin(); bit != _msyshistos.end(); bit ++)
+    {
+      TString sample = bit -> first;
+      for (vector<HistoUnfolding *>::iterator it = GetV(SYSMO, sample.Data()) -> begin(); it != GetV(SYSMO, sample.Data()) -> end(); it ++)
+	{
+	  if ((*it) -> GetSysType() == THEORSYS and TString((*it) -> GetTag()).Contains("up"))
+	    {
+	      array<HistoUnfolding *, 2> pair;
+	      pair[0] = nullptr;
+	      pair[1] = nullptr;
+	      pair[0] = *it;
+	      TString newtag = (*it) -> GetTag();
+	      if (TString((*it) -> GetCategory()) != "Background") 
+		{
+		  newtag.ReplaceAll("up", "dn");
+		}
+	      else
+		{
+		  newtag.ReplaceAll("up", "down");
+		  if (not GetSys(newtag.Data(), sample.Data()))
+		    {
+		      newtag = (*it) -> GetTag();
+		      newtag.ReplaceAll("up", "dn");
+		    }
+		}
+	      //printf("%s %s\n", (*it) -> GetTag(), newtag.Data());
+	      pair[1] = GetSys(newtag.Data(), sample.Data());
+	      _m2dirsyshistos[sample].push_back(pair); 
+	    }
+	  else if ((*it) -> GetSysType() == THEORSYS and TString((*it) -> GetTag()).Contains("m173v5"))
+	    {
+	      array<HistoUnfolding *, 2> pair;
+	      pair[0] = nullptr;
+	      pair[1] = nullptr;
+	      pair[0] = *it;
+	      TString newtag = (*it) -> GetTag();
+	      newtag.ReplaceAll("m173v5", "m171v5");
+	      pair[1] = GetSys(newtag.Data(), sample.Data());
+	      _m2dirsyshistos[sample].push_back(pair); 
+
+	    }
+	  else if ((*it) -> GetSysType() == THEORSYS and TString((*it) -> GetTag()).Contains("m175v5"))
+	    {
+	      array<HistoUnfolding *, 2> pair;
+	      pair[0] = nullptr;
+	      pair[1] = nullptr;
+	      pair[0] = *it;
+	      TString newtag = (*it) -> GetTag();
+	      newtag.ReplaceAll("m175v5", "m169v5");
+	      pair[1] = GetSys(newtag.Data(), sample.Data());
+	      _m2dirsyshistos[sample].push_back(pair); 
+
+	    }
+	  else if ((*it) -> GetSysType() == THEORSYS and TString((*it) -> GetTag()).Contains("m178v5"))
+	    {
+	      array<HistoUnfolding *, 2> pair;
+	      pair[0] = nullptr;
+	      pair[1] = nullptr;
+	      pair[0] = *it;
+	      TString newtag = (*it) -> GetTag();
+	      newtag.ReplaceAll("m178v5", "m166v5");
+	      pair[1] = GetSys(newtag.Data(), sample.Data());
+	      _m2dirsyshistos[sample].push_back(pair); 
+
+	    }
+
+	  else if ((*it) -> GetSysType() == EXPSYS and TString((*it) -> GetTag()).Contains("_up"))
+	    {
+	      array<HistoUnfolding *, 2> pair;
+	      pair[0] = nullptr;
+	      pair[1] = nullptr;
+	      pair[0] = *it;
+	      TString newtag = (*it) -> GetTag();
+	      newtag.ReplaceAll("_up", "_down");
+	      pair[1] = GetSys(newtag.Data(), sample.Data());
+	      _m2dirsyshistos[sample].push_back(pair);
+	    }
+	  else
+	    {
+	      const TString tag = (*it) -> GetTag();                                                                      
+	      if (not tag.Contains("dn") and not tag.Contains("down") and not tag.Contains("m171v5") and not tag.Contains("m169v5") and not tag.Contains("m166v5"))
+		_m1dirsyshistos[sample].push_back((*it));
+	    }
+
+	}
+    }
+    printf("2 DIR\n");
+  for (map<TString, vector<array<HistoUnfolding *, 2>>> :: iterator bit = _m2dirsyshistos.begin(); bit != _m2dirsyshistos.end(); bit ++)
+    {
+      TString sample = bit -> first;
+      printf("sample %s\n", sample.Data());
+      for (vector<array<HistoUnfolding *, 2>>::iterator it =  bit -> second.begin(); it != bit -> second.end(); it ++)
+  	{
+  	  printf("%s %s\n", (*it)[0] -> GetTag(), (*it)[1] -> GetTag()); 
+  	}
+    }
+  printf("1 DIR\n");
+  for (map<TString, vector<HistoUnfolding *>> :: iterator bit = _m1dirsyshistos.begin(); bit != _m1dirsyshistos.end(); bit ++)
+    {
+      TString sample = bit -> first;
+      
+      printf("sample %s\n", sample.Data());
+      for (vector<HistoUnfolding *>::iterator it =  bit -> second.begin(); it != bit -> second.end(); it ++)
+  	{
+  	  printf("%s\n", (*it) -> GetTag()); 
+  	}
+      
+    }
+  //getchar();
+}
+
+HistoUnfolding * CompoundHistoUnfolding::Level::GetSys(const char * systag, const char * sample)
+{
+  
+  vector<HistoUnfolding *>::iterator it = GetV(SYSMO, sample) -> begin();
+  HistoUnfolding * sys = nullptr;
+  while ( it != GetV(SYSMO, sample) -> end() and not sys)
+    {
+      //      (*it) -> ls();
+      TString tag ((*it) -> GetTag());
+      //      printf("%s\n", tag.Data());
+      if (TString(systag) == tag)
+	{
+	  sys = *it;
+	}
+      it ++;
+    }
+  return sys;
+}
+
+HistoUnfolding * CompoundHistoUnfolding::Level::GetExpSys(const char * expsystag, ExpSysType_t expsyscode)
+{
 }
 
 CompoundHistoUnfolding::Level::~Level()

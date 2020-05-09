@@ -34,6 +34,12 @@ HistoUnfoldingTH2::HistoUnfoldingTH2(const char * name, const char* title, Int_t
   _th2 -> SetDirectory(nullptr);
 }
 
+HistoUnfoldingTH2::HistoUnfoldingTH2(SampleDescriptor * sd):  _th2(nullptr), HistoUnfolding(sd)
+{
+  //  printf("calling HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd)\n");
+}
+
+
 void HistoUnfoldingTH2::FillFromTree(const char * sampletag, const char * jettag, const char *chargetag, const char * observable)
 {
   // unsigned long coinc = 0;
@@ -125,5 +131,6 @@ const char * HistoUnfoldingTH2::WhoAmI()
 
 HistoUnfoldingTH2::~HistoUnfoldingTH2()
 {
-
+  if (GetTH2())
+    delete GetTH2();
 }

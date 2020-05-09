@@ -124,7 +124,7 @@ void CompoundHistoUnfolding::PullAnalysis()
 
 void CompoundHistoUnfolding::CreateListOfExpSysSamples()
 {
-  for (vector<HistoUnfolding *>::iterator it = GetV(IN, SYSMO) -> begin(); it != GetV(IN, SYSMO) -> end(); it ++)
+  for (vector<HistoUnfolding *>::iterator it = GetV(IN, SYSMO, signaltag) -> begin(); it != GetV(IN, SYSMO, signaltag) -> end(); it ++)
     {
       if ((*it) -> GetSysType() == EXPSYS)
 	{
@@ -140,19 +140,45 @@ void CompoundHistoUnfolding::CreateListOfExpSysSamples()
 	      sd -> SetSampleType(EXPSYS);
 	      _expsyssamples.push_back(sd);
 	    }
-	    
+	  else
+	    _nonexpsyssamples.push_back(*it);
+	 
 	}
-    }
-  for (vector<SampleDescriptor *>:: iterator it  = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
-    {
-      //(*it) -> ls();
+      else
+	{
+	  _nonexpsyssamples.push_back(*it);
+	}
     }
 }
 
+// void CompoundHistoUnfolding::CreateListOfBckgSamples()
+// {
+//   for (map<TString, vector<HistoUnfolding *>>::iterator bit = _msyshistos.begin(); bit != _msyshistos.end(); bit ++)
+//     {
+//       TString sample = bit -> first;
+//       if (sample != signaltag)
+// 	continue;
+//       for (vector<HistoUnfolding *>::iterator it = GetV(IN, SYSMO, sample.Data()) -> begin(); it != GetV(IN, SYSMO, sample.Data()) -> end(); it ++)
+// 	{
+// 	  TString tag((*it) -> GetTag());
+// 	  if (tag.Contains("_up"))
+// 	    {
+// 	      tag.ReplaceAll("_up", "");
+// 	      TString title((*it) -> GetTitle());
+// 	      title.ReplaceAll(" up", "");
+// 	      SampleDescriptor *sd = new SampleDescriptor(*it);
+// 	      sd -> SetTag(tag);
+// 	      sd -> SetTitle(title);
+// 	      _mbckghistos.at(sample). push_back(sd);
+// 	    }
+// 	}
+//     }
+// }
+
 void CompoundHistoUnfolding::MarkSysSample(const char * tag)
 {
-  HistoUnfolding * sys = GetSys(IN, tag);
-  if (GetSys(IN, tag))
+  HistoUnfolding * sys = GetSys(IN, tag, signaltag);
+  if (GetSys(IN, tag, signaltag))
     {
       SampleDescriptor *sd = new SampleDescriptor();
       sd -> SetTag(tag);
@@ -169,13 +195,14 @@ void CompoundHistoUnfolding::MarkSysSample(const char * tag)
 
 HistoUnfolding * CompoundHistoUnfolding::GetExpSys(ResultLevelCode_t resultcode, const char * expsystag, ExpSysType_t expsyscode)
 {
-  vector<HistoUnfolding *>::iterator it = GetV(resultcode, SYSMO) -> begin();
+  vector<HistoUnfolding *>::iterator it = GetV(resultcode, SYSMO, signaltag) -> begin();
   HistoUnfolding * expsys = nullptr;
   const TString comp = expsyscode == UP ? "_up" : "_down";
-  while ( it != GetV(resultcode, SYSMO) -> end() or not expsys)
+  while ( it != GetV(resultcode, SYSMO, signaltag) -> end() or not expsys)
     {
+      //(*it) -> ls();
+      //      printf("%s\n", (*it) -> GetTag());
       TString tag ((*it) -> GetTag());
-      //      printf("%s\n", tag.Data());
       if (TString(expsystag) + comp == tag)
 	{
 	  expsys = *it;
@@ -185,30 +212,19 @@ HistoUnfolding * CompoundHistoUnfolding::GetExpSys(ResultLevelCode_t resultcode,
   return expsys;
 }
 
-HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, const char * systag)
+HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, const char * systag, const char * sample)
 {
   
-  vector<HistoUnfolding *>::iterator it = GetV(resultcode, SYSMO) -> begin();
-  HistoUnfolding * sys = nullptr;
-  while ( it != GetV(resultcode, SYSMO) -> end() or not sys)
-    {
-      //      (*it) -> ls();
-      TString tag ((*it) -> GetTag());
-      //      printf("%s\n", tag.Data());
-      if (TString(systag) == tag)
-	{
-	  sys = *it;
-	}
-      it ++;
-    }
-  return sys;
+  return GetLevel(resultcode) -> GetSys(systag, sample);
 }
 
 
 void CompoundHistoUnfolding::createCov()
 {
+  printf("creating cov\n");
   const ResultLevelCode_t resultlevel = OUT;
   //  TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALNOMINALMO) -> Project(GEN, "hsignal");
+  
   TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALPROXY, resultlevel) -> Project(GEN, "hsignal");
   hdsignal -> SetDirectory(nullptr);
   hdsignal -> Scale(1.0/hdsignal -> Integral());
@@ -222,6 +238,8 @@ void CompoundHistoUnfolding::createCov()
     {
       //      if (ind > 0)
       //break;
+      printf("creating matrix exp %s\n", (*it) -> GetTag());
+
       ind ++;
       //printf("*************\n");
       TH1F * hsysdown = GetExpSys(resultlevel, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
@@ -274,7 +292,12 @@ void CompoundHistoUnfolding::createCov()
     }
   for (vector<SampleDescriptor *>::iterator it = _markedsyssamples.begin(); it != _markedsyssamples.end(); it ++)
     {
-      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag()) -> Project(GEN, "markedsys");
+      printf("creating matrix \n", (*it) -> GetTag());
+      TH1 * hdsignal = (TH1*) GetSys(IN, (*it) -> GetTag(), signaltag) -> Project(GEN);
+      hdsignal -> SetDirectory(nullptr);
+      hdsignal -> Scale(1.0/hdsignal -> Integral());
+
+      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag(), signaltag) -> Project(GEN, "markedsys");
       hsys -> SetDirectory(nullptr);
       //      NormaliseToBinWidth(hsys);
       hsys -> Scale(1.0 / hsys -> Integral());
@@ -289,13 +312,51 @@ void CompoundHistoUnfolding::createCov()
 	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
 	    }
 	}
+      delete hdsignal;
     }
+  for (vector<SampleDescriptor *>::iterator it = _nonexpsyssamples.begin(); it != _nonexpsyssamples.end(); it ++)
+    {
+      printf("creating matrix %s\n", (*it) -> GetTag());
+      TH1 * hdsignalprox = nullptr;
+      if ((*it) -> GetSysType() == THEORSYS)
+	{
+	  hdsignalprox = (TH1*) GetSys(IN, (*it) -> GetTag(), signaltag) -> Project(GEN);
+	  hdsignalprox -> SetDirectory(nullptr);
+	  hdsignalprox -> Scale(1.0/hdsignalprox -> Integral());
+	}
+      else
+	{
+	  hdsignalprox = hdsignal;
+	}
+      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag(), signaltag) -> Project(GEN, "markedsys");
+      hsys -> SetDirectory(nullptr);
+      //      NormaliseToBinWidth(hsys);
+      hsys -> Scale(1.0 / hsys -> Integral());
+      for (unsigned char xind = 1; xind < nbins + 1; xind ++)
+	{
+	  const float meanx = 0.5 * (hsys -> GetBinContent(xind) + hdsignalprox -> GetBinContent(xind));
+	  for (unsigned char yind = 1; yind < nbins + 1; yind ++)
+	    {
+	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignalprox -> GetBinContent(yind));
+	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
+		(hdsignalprox  -> GetBinContent(xind) - meanx) * (hdsignalprox  -> GetBinContent(yind) - meany);
+	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
+	    }
+	}
+      if ((*it) -> GetSysType() == THEORSYS)
+	{
+	  delete hdsignalprox;
+	}
+    }
+
   printf("covariance matrix\n");
   GetLevel(resultlevel) -> cov -> Print();
   TCanvas * c = new TCanvas("cov", "cov");
   GetLevel(resultlevel) -> cov -> Draw("COLZ");
   c -> SaveAs(TString(_folder) + "/cov.png");
   delete hdsignal;
+  printf("end creating cov\n");
+  //  getchar();
 } 
 
 double CompoundHistoUnfolding::GetChi() 
@@ -334,4 +395,56 @@ double CompoundHistoUnfolding::GetChi()
   delete hdata;
   delete hmodel;
   return chi(0, 0);
+}
+
+TH1 * CompoundHistoUnfolding::GetSignalProxy(ResultLevelCode_t resultcode, RecoLevelCode_t recocode, const char * sample, ExpSysType_t sys, const char * tag)
+{
+  if (resultcode == IN)
+    {
+      if (TString(sample) == signaltag)
+	{
+	  return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
+	}
+      else
+	{
+	  return GetBackgroundH(sample) -> Project(recocode);
+	}
+    }
+  if (resultcode == OUT)
+    {
+      if (TString(sample) == signaltag)
+	{
+	  if (sys == EXPSYS)
+	    {
+	    return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
+	    }
+	  if (sys == THEORSYS)
+	    {
+	      // if (TString(tag).Contains("non_clos"))
+	      // 	printf("%p\n", GetSys(IN, tag, sample));
+	      
+	      TH1 * hsigprox = GetSys(IN, tag, sample) -> Project(recocode);
+	      if (recocode == RECO)
+		{
+		  ApplyScaleFactor(hsigprox);
+		  // 	  TH2 * signalmatrix = GetSys(IN, tag, sample) -> GetTH2();
+		  // 	  for (unsigned char bind = 0; bind <= hsigprox -> GetNbinsX() + 1; bind ++)
+
+
+	      // 	    {
+	      // 	      const float fact = signalmatrix -> GetBinContent(bind, 0) / signalmatrix -> Integral(bind, bind, 0, signalmatrix -> GetNbinsY() + 1);
+	      // 	      hsigprox -> SetBinContent(bind, hsigprox -> GetBinContent(bind) * fact);
+	      // 	    }
+	      	}
+
+	      return hsigprox;
+	    }
+	}
+      else
+	{
+	  return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
+
+	}
+
+    }
 }

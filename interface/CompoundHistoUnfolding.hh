@@ -23,12 +23,12 @@ extern const char * bckgtitles[6];
 float calculatearea(TH1 *);
 class CompoundHistoUnfolding: public TNamed
 {
-  vector<TObject *>              _garbage;
-  void CreateDataGraph(ResultLevelCode_t resultcode, RecoLevelCode_t recocode);
-  map<TString, HistoUnfolding *> aggrbackgroundMC;
-  vector<HistoUnfolding *>       _vbackgroundhistos;
-  vector<SampleDescriptor *>     _expsyssamples;
-  vector<SampleDescriptor *>     _markedsyssamples;
+  vector<TObject *>                       _garbage;
+  map<TString, HistoUnfolding *>          aggrbackgroundMC;
+  vector<HistoUnfolding *>                _vbackgroundhistos;
+  vector<SampleDescriptor *>              _expsyssamples;
+  vector<SampleDescriptor *>              _nonexpsyssamples;
+  vector<SampleDescriptor *>              _markedsyssamples;
   void CreateListOfExpSysSamples();
   HistoUnfoldingTH2 *            totalbackground;
   char                           _signal_title[64];
@@ -61,42 +61,51 @@ public:
   char                           observable[128];
   char                           signaltag[128];
   char                           method[128];
-  bool                           calculate_bins;
+  bool                                    calculate_bins;
   CompoundHistoUnfolding();
   CompoundHistoUnfolding(const char* name, const char* title, Int_t nbinsx, const Float_t* xbins, Int_t nbinsy, const Float_t* ybins);
   CompoundHistoUnfolding(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
   ~CompoundHistoUnfolding();
-
+  HistoUnfoldingTH2 * GetTotalBackground();
   void SetFolder(const char *);
   struct Level: public TObject
   {
     Level();
-    vector<HistoUnfolding *> _vdatahistos;
-    vector<HistoUnfolding *> _vsignalhistos;
-    vector<HistoUnfolding *> _vsyshistos;
+    vector<HistoUnfolding *>                    _vdatahistos;
+    vector<HistoUnfolding *>                    _vsignalhistos;
+    map<TString, vector<HistoUnfolding *>>      _msyshistos;
+    map<TString, vector<array<HistoUnfolding *, 2>>>   _m2dirsyshistos;
+    map<TString, vector<HistoUnfolding *>>       _m1dirsyshistos;
+
+    map<TString, vector<SampleDescriptor *>>    _mbckghistos;
+
     //HistoUnfolding * signalnominal;
-    HistoUnfolding * signal;
-    HistoUnfolding * data;
-    HistoUnfolding * totalMC;
-    HistoUnfolding * totalMCUnc;
-    HistoUnfolding * totalMCUncShape;
-    HistoUnfolding * datambackground;;
-    HistoUnfolding *& GetHURef(MOCode_t, ResultLevelCode_t resultcode = 3); 
-    HistoUnfolding * GetHU(MOCode_t, ResultLevelCode_t resultcode = 3); 
-    vector<HistoUnfolding *> * GetV(MOCode_t);
-    HistoUnfolding * GetInputHU(MOCode_t, const char * name);
-    void lsInputHU(MOCode_t);
+    HistoUnfolding                              * signal;
+    HistoUnfolding                              * data;
+    HistoUnfolding                              * totalMC;
+    HistoUnfolding                              * totalMCUnc;
+    HistoUnfolding                              * totalMCUncShape;
+    HistoUnfolding                              * datambackground;;
+    
+    HistoUnfolding                      *& GetHURef(MOCode_t, ResultLevelCode_t resultcode = 3); 
+    HistoUnfolding                      * GetHU(MOCode_t, ResultLevelCode_t resultcode = 3); 
+    vector<HistoUnfolding *>            * GetV(MOCode_t, const char * sample = nullptr);
+    HistoUnfolding                      * GetInputHU(MOCode_t, const char * name, const char * sample = nullptr);
+    HistoUnfolding                      * GetExpSys(const char *, ExpSysType_t );
+    HistoUnfolding                      * GetSys(const char * , const char *sample);
+    void lsInputHU(MOCode_t, const char * sample = nullptr);
     void Format();
     TMatrixD * cov;
+    void SeparateSys();
     struct ProjectionDeco: public TObject
     {
       ProjectionDeco();
       TGraphAsymmErrors * _ratiogr; 
       TGraphAsymmErrors * _grtotalMC;
-      TGraphErrors * _datagr;
-      TH1 * _ratioframe; 
-      TH1 * _ratioframeshape; 
-      TLegend * legend;
+      TGraphErrors      * _datagr;
+      TH1               * _ratioframe; 
+      TH1               * _ratioframeshape; 
+      TLegend           * legend;
       void Format();
       ~ProjectionDeco();
       ClassDef(ProjectionDeco, 1);
@@ -105,37 +114,48 @@ public:
     ~Level();
     ClassDef(Level, 1);
   } INLEVEL, OUTLEVEL;
+  void AddXsecSystematics();
+  HistoUnfolding * GetBackgroundH(const char *);
+  void PrintScaleFactors();
   TH1 * input;
+  TH2 * ematrixtotal;
   double GetChi();
+  void CreateDataGraph(ResultLevelCode_t resultcode, RecoLevelCode_t recocode);
   void ApproximateTheorSys();
   Level * GetLevel(ResultLevelCode_t);
-  vector<HistoUnfolding *> * GetV(ResultLevelCode_t, MOCode_t );
+  vector<HistoUnfolding *> * GetV(ResultLevelCode_t, MOCode_t, const char * sampletag = nullptr);
   void AggregateBackgroundMCs();
   void CreateTotalMCUnc(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
+  void CreateTotalMCUncOLD(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
+  void Compareunc(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
   void CreateMCTotal(ResultLevelCode_t = IN);
   void CreateBackgroundTotal();
-  void CreateDataMinusBackground(ResultLevelCode_t = IN);
+  void CreateDataMinusBackground(ResultLevelCode_t);
   void ScaleFactor();
   void ApplyScaleFactor(TH1 *h);
   void ApplyScaleFactor(TH2 *h);
   void Format();
   void createCov();
-  HistoUnfolding * GetExpSys(ResultLevelCode_t, const char *, ExpSysType_t );
-  HistoUnfolding * GetSys(ResultLevelCode_t, const char * );
+  HistoUnfolding                   * GetExpSys(ResultLevelCode_t, const char *, ExpSysType_t );
+  HistoUnfolding                   * GetSys(ResultLevelCode_t, const char * , const char * sample);
+  TH1                   * GetSignalProxy(ResultLevelCode_t, RecoLevelCode_t recocode, const char *, ExpSysType_t sys = 0, const char * = nullptr);
   void MarkSysSample(const char *);
-  void LoadHistos(const char *, SysTypeCode_t = NOMINAL);
-  void FillHistos(const char *, SysTypeCode_t = NOMINAL);
+  void LoadHistos(const char *, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
+  void FillHistos(const char *, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
   void AddHisto(HistoUnfoldingTH2 *);
   //  void LoadSys(const char *);
   void NormaliseToBinWidth(TH1 *h);
-
+  void RejectNonReco(TH1 *h);						
+  void PrintNonRecoCoeff();
   THStack * CreateTHStack(RecoLevelCode_t = RECO, ResultLevelCode_t = IN);
   void SetOrigBinWidth(float orig);
   float GetOrigBinWidth() const;
   void PlotDataMC();
   void Do();
-  void Process();
-  void unfold();
+  void Process(bool reg = false);
+  void unfold(bool reg = false);
+  void unfoldBayesianOLD(unsigned char = 1);
+  void unfoldBayesian(unsigned char = 1);
   void PullAnalysis();
   TPad * CreateRatioGraph(RecoLevelCode_t = RECO, ResultLevelCode_t = IN);
   TPad * CreateMainPlot(RecoLevelCode_t = RECO, ResultLevelCode_t = IN);
@@ -146,6 +166,7 @@ public:
   TString CreateTitle(const char *);
   void CreateLegend(RecoLevelCode_t, ResultLevelCode_t);
   void SetSignalTag(const char *);
+  const char * GetSignalTag();
   void SetMethod(const char *);
   void SetObservable(const char *);
   void SetCHUnominal(CompoundHistoUnfolding * );
@@ -156,6 +177,7 @@ public:
   HistoUnfoldingTH2 * GetBackgroundTotal();
   void WriteHistograms();
   bool IsRegular() const;
+  TCanvas * stabpur();
   ClassDef(CompoundHistoUnfolding, 1);
 };
 

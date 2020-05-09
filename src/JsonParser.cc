@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void JsonParser::Load(const char * json, SysTypeCode_t sys)
+void JsonParser::Load(const char * json, SysTypeCode_t sys, const char * sampletag)
 {
   FILE * pFile;
   long lSize;
@@ -10,7 +10,11 @@ void JsonParser::Load(const char * json, SysTypeCode_t sys)
   size_t result;
 
   pFile = fopen ( json , "rb" );
-  if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
+  if (pFile==NULL) 
+    {
+      fputs ("File error", stderr); 
+      exit (1);
+    }
 
   // obtain file size:
   fseek (pFile , 0 , SEEK_END);
@@ -19,11 +23,19 @@ void JsonParser::Load(const char * json, SysTypeCode_t sys)
 
   // allocate memory to contain the whole file:
   buffer = (char*) malloc (sizeof(char)*lSize);
-  if (buffer == NULL) {fputs ("Memory error",stderr); exit (2);}
+  if (buffer == NULL) 
+    {
+      fputs ("Memory error",stderr); 
+      exit (2);
+    }
 
   // copy the file into the buffer:
-  result = fread (buffer,1,lSize,pFile);
-  if (result != lSize) {fputs ("Reading error",stderr); exit (3);}
+  result = fread (buffer, 1, lSize, pFile);
+  if (result != lSize) 
+    {
+      fputs ("Reading error",stderr); 
+      exit (3);
+    }
   /* the whole file is now loaded in the memory buffer. */
 
   // terminate
@@ -47,8 +59,8 @@ void JsonParser::Load(const char * json, SysTypeCode_t sys)
     {
       //	  char array[2] = {*p, '\0' };
       //  printf("%s", array);
-
-
+      //      printf("[%c]\n", *p);
+      
       if (*p == ',' and delim1)
 	{
 	  delim2 = true;
@@ -94,15 +106,17 @@ void JsonParser::Load(const char * json, SysTypeCode_t sys)
   free (buffer);
   for (unsigned long ind = 0; ind < samplebuffers.size(); ind ++)
     {
-      //      printf("ind %u sample %s\n", ind, samplebuffers[ind]);
+      //printf("ind %u sample %s\n", ind, samplebuffers[ind]);
       SampleDescriptor *sd = new SampleDescriptor() ;
-      ParseSample(samplebuffers[ind], *sd, sys);
+      ParseSample(samplebuffers[ind], *sd, sys, sampletag);
+      // sd -> ls();
+      // getchar();
       _samples.push_back(sd);;
     }
 
 }
 
-void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysTypeCode_t sys)
+void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysTypeCode_t sys, const char * sampletag)
 {
   
   const char *p = sample;
@@ -112,6 +126,7 @@ void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysType
   unsigned char tagind = 0;
   for( ; *p != ':'; p ++)
     {
+      //      printf("[%c]\n", *p);
       tag[tagind] = *p;
       tagind ++;
     }
@@ -210,25 +225,35 @@ void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysType
       //printf("ind %u field [%s]\n", ind, fields[ind]);
     }
   //printf("title test [%s]\n", fields[3]);
+  //printf("[%s]\n", tag);
   sd._tag = tag;
   sd._xsec = (stof(fields[0], 0));
   sd._title = fields[3];
-  if (fields[4][0] == '"')
+  sd._category = fields[4];
+  
+  if (fields[5][0] == '"')
     {
-      sd._color = fields[4];
+      sd._color = fields[5];
     }
   else
     {
-      sd._colornum = stoi(fields[4]);
+      sd._colornum = stoi(fields[5]);
+      delete [] fields[5];
     }
   sd._sys_type = sys;
+  //printf("probe B\n");
+  if (sys == NOMINAL)
+    sd.SetSample(sd.GetTag());
+  else
+    sd.SetSample(sampletag);
+  //  printf("probe C\n");
   //sd.ls();
   sd.PruneStringsFromQuotes();
   if (TString(fields[1]) == '1')
     {
       sd._sample_type = DATA;
     }
-  else if (TString(sd._tag) == _signal_tag)
+  else if (TString(sd.GetSample()) == _signal_tag)
     {
       sd._sample_type = SIGNAL;
     }
@@ -239,12 +264,10 @@ void JsonParser::ParseSample(const char * sample, SampleDescriptor & sd, SysType
   delete[] fields[0];
   delete[] fields[1];
   delete[] fields[2];
-  delete[] fields[5];
   delete[] fields[6];
   delete[] fields[7];
+  delete[] fields[8];
   
-
-
 }
 
 void JsonParser::ls()
@@ -254,6 +277,7 @@ void JsonParser::ls()
     {
       printf("sample %lu\n", ind);
       _samples[ind] -> ls();
+      printf("\n");
     }
   printf("End listing \n");
 }
@@ -308,6 +332,11 @@ SampleDescriptor * JsonParser::GetSample(unsigned long ind)
 {
   return _samples[ind];
 } 
+
+vector<SampleDescriptor *> * JsonParser::GetSamplesV()
+{
+  return & _samples;
+}
 
 
 void JsonParser::SetSignalTag(const char * tag)

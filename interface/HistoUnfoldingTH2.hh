@@ -6,6 +6,7 @@ class HistoUnfoldingTH2: public HistoUnfolding
   TH2F * _th2; 
 public:
   HistoUnfoldingTH2();
+  HistoUnfoldingTH2(SampleDescriptor * sd);
   HistoUnfoldingTH2(HistoUnfoldingTH2 *, const char * );
   HistoUnfoldingTH2(const char* name, const char* title, Int_t nbinsx, const Float_t* xbins, Int_t nbinsy, const Float_t* ybins, SampleDescriptor *);
   HistoUnfoldingTH2(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, SampleDescriptor *);
