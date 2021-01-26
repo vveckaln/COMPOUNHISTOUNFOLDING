@@ -72,33 +72,34 @@ void CompoundHistoUnfolding::PullAnalysis()
   hpurity -> SetDirectory(nullptr);
   hpurity -> Reset("ICE");
   TH2F * histsig = GetLevel(IN) -> GetHU(SIGNALPROXY, IN) -> GetTH2();
-  for (unsigned char ind = 1; ind < histsig -> GetNbinsY() + 1; ind ++)
-    {
-      float diag = histsig -> GetBinContent(2*(ind -1) + 1, ind);
-      diag += histsig -> GetBinContent(2*(ind - 1) + 2, ind);
-      const float stability = diag / histsig -> Integral(1, histsig -> GetNbinsX(), ind, ind);
-      hstability -> SetBinContent(ind, stability);
-      const float purity = diag / histsig -> Integral(2*(ind - 1) + 1, 2 * (ind - 1) + 2, 1, histsig -> GetNbinsY());
-      hpurity -> SetBinContent(ind, purity);
-    }
-  hpurity -> SetLineColor(kRed);
-  hstability -> SetLineColor(kBlue);
-  hstability -> SetLineStyle(7);
-  THStack stack("stabpur", TString("stabpur; ") + _XaxisTitle + "; ratio");
-  stack.Add(hstability);
-  stack.Add(hpurity);
-  stack.SetMinimum(0.0);
-  stack.SetMaximum(1.4 * stack.GetMaximum("nostack"));
-  TCanvas * cstabpur = new TCanvas(CreateName("stabpur"), CreateTitle("stabpur"));
-  hstability -> SetTitle("stability");
-  hpurity -> SetTitle("purity");
-  stack.Draw("nostack");
-  TLegend * legend = new TLegend(0.7, 0.7, 0.85, 0.85);
-  legend -> SetLineWidth(0);
-  legend -> AddEntry(hstability);
-  legend -> AddEntry(hpurity);
-  legend -> Draw("SAME");
+  // for (unsigned char ind = 1; ind < histsig -> GetNbinsY() + 1; ind ++)
+  //   {
+  //     float diag = histsig -> GetBinContent(2*(ind -1) + 1, ind);
+  //     diag += histsig -> GetBinContent(2*(ind - 1) + 2, ind);
+  //     const float stability = diag / histsig -> Integral(1, histsig -> GetNbinsX(), ind, ind);
+  //     hstability -> SetBinContent(ind, stability);
+  //     const float purity = diag / histsig -> Integral(2*(ind - 1) + 1, 2 * (ind - 1) + 2, 1, histsig -> GetNbinsY());
+  //     hpurity -> SetBinContent(ind, purity);
+  //   }
+  // hpurity -> SetLineColor(kRed);
+  // hstability -> SetLineColor(kBlue);
+  // hstability -> SetLineStyle(7);
+  // THStack stack("stabpur", TString("stabpur; ") + _XaxisTitle + "; ratio");
+  // stack.Add(hstability);
+  // stack.Add(hpurity);
+  // stack.SetMinimum(0.0);
+  // stack.SetMaximum(1.4 * stack.GetMaximum("nostack"));
+  // TCanvas * cstabpur = new TCanvas(CreateName("stabpur"), CreateTitle("stabpur"));
+  // hstability -> SetTitle("stability");
+  // hpurity -> SetTitle("purity");
+  // stack.Draw("nostack");
+  // TLegend * legend = new TLegend(0.7, 0.7, 0.85, 0.85);
+  // legend -> SetLineWidth(0);
+  // legend -> AddEntry(hstability);
+  // legend -> AddEntry(hpurity);
+  // legend -> Draw("SAME");
 
+  TCanvas * cstabpur = stabpur();
   cstabpur -> SaveAs(TString(_folder) + "/stabpur.png");
   TH2D* hpurity2D = (TH2D*) histsig -> Clone(CreateName("purity2D"));
   hpurity2D -> SetDirectory(nullptr);
@@ -219,145 +220,377 @@ HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, co
 }
 
 
-void CompoundHistoUnfolding::createCov()
+void CompoundHistoUnfolding::createCov_new()
 {
   printf("creating cov\n");
   const ResultLevelCode_t resultlevel = OUT;
-  //  TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALNOMINALMO) -> Project(GEN, "hsignal");
+  const RecoLevelCode_t recolevel = GEN;
+  TH1 * hsignal = GetLevel(resultlevel) -> GetHU(SIGNALMO) -> Project(recolevel);
+  const int nbins = hsignal -> GetNbinsX();
+  const unsigned char range = nbins - 1;  
+  delete hsignal;
+  printf("nbins %u\n", nbins);
+  TMatrixD expunc(nbins, nbins);
+  //  float scales[nbins];
+  // for (unsigned char bind = 1; bind <= nbins; bind ++)
+  //   {
+  //     scales[bind - 1] = inputsig -> Integral(1, inputsig -> GetNbinsX(), bind, bind)/inputsig -> Integral(0, inputsig -> GetNbinsX(), bind, bind);
+  //     printf("%f\n", scales[bind -1]);
+  //   }
+  // getchar();
+  const bool prune = false;
+  for (map<TString, vector<array<HistoUnfolding *, 2>>> :: iterator bit = GetLevel(resultlevel) -> _m2dirsyshistos.begin(); bit != GetLevel(resultlevel) -> _m2dirsyshistos.end(); bit ++)
+    {
+      //    continue;
+      TString sample = bit -> first;
+      if (sample != signaltag)
+	{
+	}
+      for (vector<array<HistoUnfolding *, 2>>::iterator it =  bit -> second.begin(); it != bit -> second.end(); it ++)
+	{
+	  if ((*it)[0] -> GetSysType() != EXPSYS)
+	    continue;
+	  // (*it)[0] -> ls();
+	  TH1 * hsigup   = GetSignalProxy(resultlevel, recolevel, sample.Data(), (*it)[0] -> GetSysType(), (*it)[0] -> GetTag(), prune);
+	  // TH2 * hsigup2 = GetLevel(OUT) -> GetHU(SIGNALPROXY, OUT);
+	  hsigup -> SetName(TString(hsigup -> GetName()) + "_up");
+	  TH1 * hsigdown = GetSignalProxy(resultlevel, recolevel, sample.Data(), (*it)[1] -> GetSysType(), (*it)[1] -> GetTag(), prune);
+	  hsigdown -> SetName(TString(hsigdown -> GetName()) + "_down");
+	  // for (unsigned char bind = 0; bind < nbins; bind ++)
+	  //   {
+	  //     const float fact = hsigup2 -> Integral(1, hsigup2 -> GetNbinsX(), 1, nbins)/hsigup2 -> Integral(1, hsigup2 -> GetNbinsX(), 0, nbins);
+	  //     printf("%f\n", fact);
+	  //   }
+	  // getchar();
+	  // hsigup -> Print("all");
+	  // hsigdown -> Print("all"); 
+	  HistoUnfolding * up     = (*it)[0];
+	  
+	  TH1 *            hup    = up -> Project(recolevel, "up");
+	  HistoUnfolding * down   = (*it)[1];
+	  TH1 *            hdown  = down -> Project(recolevel, "down");
+	  if (prune)
+	    {
+	      Prune(hup, (*it)[0] -> GetTag(), sample.Data(), (*it)[0] -> GetSysType(), GEN);
+	      Prune(hdown, (*it)[1] -> GetTag(), sample.Data(), (*it)[1] -> GetSysType(), GEN);
+	    }
+
+	  // for (unsigned char bind = 1; bind < nbins + 1; bind ++)
+	  //   {
+	  //     hsigdown -> SetBinContent(bind, hsigdown -> GetBinContent(bind) * (1.0 - scales[bind -1]));
+	  //     hsigup   -> SetBinContent(bind, hsigup -> GetBinContent(bind) * (1.0 - scales[bind -1]));
+	  //     hup      -> SetBinContent(bind, hup -> GetBinContent(bind) * (1.0 - scales[bind -1]));
+	  //     hdown    -> SetBinContent(bind, hdown -> GetBinContent(bind) * (1.0 - scales[bind -1]));
+
+	  //   }
+	  const double integralnominalup   = hsigup   -> Integral();
+	  const double integralnominaldown = hsigdown -> Integral();
+
+	  if (hup -> Integral())
+	    {
+	      hup -> Scale(1.0/*integralnominalup*//hup -> Integral());
+	    }
+	  else
+	    {
+	      //	  printf("deleting %s\n", up -> GetTag());
+	      delete   hup;
+	      delete   hsigup;
+	      hup    = nullptr;
+	      hsigup = nullptr;
+	    }
+	  if (hdown -> Integral())
+	    {
+	      hdown -> Scale(/*integralnominaldown*/1.0/hdown -> Integral());
+	    }
+	  else
+	    {
+	      //printf("deleting %s\n", down -> GetTag());
+	      delete     hdown;
+	      delete     hsigdown;
+	      hdown    = nullptr;
+	      hsigdown = nullptr;
+	    }
+	  if (not hsigdown or not hsigup)
+
+	    continue;
+	  hsigdown -> Scale(1.0/hsigdown -> Integral());
+	  hsigup -> Scale(1.0/hsigup -> Integral());
+	  
+	  for (unsigned char bind1 = 1; bind1 <= nbins; bind1 ++)
+	    {
+	      const double      sup1   = hup -> GetBinContent(bind1) - hsigup -> GetBinContent(bind1);
+	      const double      sdown1 = hdown -> GetBinContent(bind1) - hsigdown -> GetBinContent(bind1);
+	      double diff1 = fabs(sup1) > fabs(sdown1) ? fabs(sup1) : fabs(sdown1);
+	      const double mean1 = 0.5 * (hup -> GetBinContent(bind1) + hdown -> GetBinContent(bind1));
+	      // if (sdown1 < 0.0)
+	      // 	diff1 *= - 1.0;
+	      for (unsigned char bind2 = 1; bind2 <= nbins; bind2 ++)
+		{
+		  const double      sup2   = hup -> GetBinContent(bind2) - hsigup -> GetBinContent(bind2);
+		  const double      sdown2 = hdown -> GetBinContent(bind2) - hsigdown -> GetBinContent(bind2);
+		  const double mean2 = 0.5 * (hup -> GetBinContent(bind2) + hdown -> GetBinContent(bind2));
+		  double diff2 = fabs(sup2) > fabs(sdown2) ? fabs(sup2) : fabs(sdown2);
+		  double cov = (hup  -> GetBinContent(bind1) - mean1) * (hup  -> GetBinContent(bind2) - mean2) +
+		  //double cov = (hup  -> GetBinContent(bind1) - hsigup -> GetBinContent(bind1)) * (hup  -> GetBinContent(bind2) - hsigup -> GetBinContent(bind2)) + 
+		    //(hdown  -> GetBinContent(bind1) - hsigdown -> GetBinContent(bind1)) * (hdown  -> GetBinContent(bind2) - hsigdown -> GetBinContent(bind2)) +
+		    (hdown  -> GetBinContent(bind1) - mean1) * (hdown  -> GetBinContent(bind2) - mean2);
+		  const char sign = cov > 0.0 ? 1.0 : - 1.0;
+		  // if (sup1 * sup2 < 0.0)
+		  //   cov *= - 1.0;
+		  printf("sign %d\n", sign);
+		  expunc(bind1 - 1, bind2 -1) += diff1 * diff2 * sign;//(sup1*sup2 + sdown1*sdown2)/2.0;
+		}
+	    }
+	  delete hup;
+	  delete hdown;
+	  delete hsigdown;
+	  delete hsigup;
+	}
+    }
+
+
+  for (map<TString, vector<HistoUnfolding *>> :: iterator bit = GetLevel(resultlevel) -> _m1dirsyshistos.begin(); bit != GetLevel(resultlevel) -> _m1dirsyshistos.end(); bit ++)
+    {
+      //continue;
+      TString sample = bit -> first;
+      for (vector<HistoUnfolding *>::iterator it =  bit -> second.begin(); it != bit -> second.end(); it ++)
+	{
+	  if ((*it) -> GetSysType() != EXPSYS)
+	    continue;
+	  if (TString((*it) -> GetCategory()) == "Colour flip")
+	    continue;
+	  TH1 * hsig = GetSignalProxy(resultlevel, recolevel, sample.Data(), (*it) -> GetSysType(), (*it) -> GetTag(), prune);
+	  // (*it) -> ls();
+	  // hsig -> Print("all");
+	  HistoUnfolding * hu      = *it;
+	  //hu -> ls();
+	  TH1 *            hsys    = hu -> Project(recolevel);
+	  if (prune)
+	    {
+	      Prune(hsys, (*it) -> GetTag(), sample.Data(), (*it) -> GetSysType(), GEN);
+	    }
+	    //  hsig -> Scale(1.0/hsig -> Integral());
+	  // for (unsigned char bind = 1; bind < nbins + 1; bind ++)
+	  //   {
+
+	  //     hsig -> SetBinContent(bind, hsig -> GetBinContent(bind) * (1.0 - scales[bind - 1]));
+	  //     hsys -> SetBinContent(bind, hsys -> GetBinContent(bind) * (1.0 - scales[bind - 1]));
+	  //   }
+	  const double integralnominal = hsig -> Integral();
+	  if (not integralnominal)
+	    continue;
+	  hsig -> Scale(1.0/hsig -> Integral());
+	  hsys -> Scale(/*integralnominal*/1.0/hsys -> Integral());
+	  for (unsigned char bind1 = 1; bind1 <= nbins; bind1 ++)
+	    {
+	      const double mean1 = 0.5 * (hsys -> GetBinContent(bind1) + hsig -> GetBinContent(bind1));
+	      	      const double      diff1   = hsys -> GetBinContent(bind1) - mean1;//hsig -> GetBinContent(bind1); 
+	      //const double      diff1   = hsys -> GetBinContent(bind1) - hsig -> GetBinContent(bind1); 
+	      for (unsigned char bind2 = 1; bind2 <= nbins; bind2 ++)
+		{
+		  const double mean2 = 0.5 * (hsys -> GetBinContent(bind2) + hsig -> GetBinContent(bind2));
+		  const double      diff2   = hsys -> GetBinContent(bind2) - mean2;//hsig -> GetBinContent(bind2); 
+		  //const double      diff2   = hsys -> GetBinContent(bind2) - hsig -> GetBinContent(bind2); 
+		  expunc(bind1 - 1, bind2 -1) += diff1 * diff2 + (hsig -> GetBinContent(bind1) - mean1) * (hsig -> GetBinContent(bind2) - mean2);
+		}
+	    }
+	  
+	  delete hsys;
+	  delete hsig;
+	}
+
+    }
+
+  if (TString(method) == "cflip" and TString(signaltag) == "MC13TeV_TTJets")
+    {
+      TH1 * hsys = GetLevel(OUT) -> GetSys("MC13TeV_TTJets_cflip", "MC13TeV_TTJets") -> Project(GEN, "cflip_out");
+      TH1 * hsig = GetLevel(IN) -> GetSys("MC13TeV_TTJets_cflip", "MC13TeV_TTJets") -> Project(GEN, "cflip_out");
+      hsys -> Scale(1.0/hsys -> Integral());
+      hsig -> Scale(1.0/hsig -> Integral());
+      for (unsigned char bind1 = 1; bind1 <= nbins; bind1 ++)
+	{
+	  const float diff1 = hsys -> GetBinContent(bind1) - hsig -> GetBinContent(bind1);
+	  for (unsigned char bind2 = 1; bind2 <= nbins; bind2 ++)
+	    {
+	      const float diff2 = hsys -> GetBinContent(bind2) - hsig -> GetBinContent(bind2);
+	      expunc(bind1 - 1, bind2 - 1) += diff1 * diff2;
+	      
+	    }
+	  
+	}
+      hsys -> Print("all");
+      hsig -> Print("all");
+      //          getchar();
+    }
+  //  expunc.Print();
+  TMatrixD cov(nbins - 1, nbins - 1);
+  for (unsigned char bindr = 0; bindr < nbins - 1; bindr ++)
+    {
+      for (unsigned char bindc = 0; bindc < nbins -1; bindc ++)
+	{
+	  
+	  cov(bindr, bindc) = expunc(bindr, bindc);
+	  //	  printf("%u %u\n", bindr, bindc);
+	}
+
+    }
+  cov.Print();
+  //getchar();
+  if (GetLevel(resultlevel) -> cov)
+    {
+      delete GetLevel(resultlevel) -> cov;
+      GetLevel(resultlevel) -> cov = nullptr;
+    }
+  GetLevel(resultlevel) -> cov = new TMatrixD(cov);
+
   
-  TH1F * hdsignal = GetLevel(resultlevel) -> GetHU(SIGNALPROXY, resultlevel) -> Project(GEN, "hsignal");
-  hdsignal -> SetDirectory(nullptr);
-  hdsignal -> Scale(1.0/hdsignal -> Integral());
-  //NormaliseToBinWidth(hdsignal);
-  const unsigned char nbins = hdsignal -> GetNbinsX() - 1;
-  GetLevel(resultlevel) -> cov = new TMatrixD(nbins, nbins);
-  GetLevel(resultlevel) -> cov -> Zero();
-  //  GetLevel(resultlevel) -> cov -> Print();
-  unsigned char ind = 0;
-  for (vector<SampleDescriptor *>::iterator it = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
-    {
-      //      if (ind > 0)
-      //break;
-      printf("creating matrix exp %s\n", (*it) -> GetTag());
-
-      ind ++;
-      //printf("*************\n");
-      TH1F * hsysdown = GetExpSys(resultlevel, (*it) -> GetTag(), DOWN) -> Project(GEN, "down");
-      hsysdown -> SetDirectory(nullptr);
-      TH1F * hsysup = GetExpSys(resultlevel, (*it) -> GetTag(), UP) -> Project(GEN, "up");
-      hsysup -> SetDirectory(nullptr);
-      
-      hsysdown -> Scale(1.0/hsysdown -> Integral());
-      hsysup -> Scale(1.0/hsysup -> Integral());
-      //      NormaliseToBinWidth(hsysdown);
-      //NormaliseToBinWidth(hsysup);
-      const double meany1 = 0.5 * (hsysup -> GetBinContent(1) + hsysdown -> GetBinContent(1));
-      const double meany2 = 0.5 * (hsysup -> GetBinContent(2) + hsysdown -> GetBinContent(2));
-      const double cov1 = hsysdown -> GetBinContent(1) - meany1;
-      const double cov2 = hsysdown -> GetBinContent(2) - meany2;
-      //     printf("meany1 %f cov1 %f meany2 %.9f cov2 %.9f ch1 %.9f ch2 %.9f \n", meany1, cov1, meany2, cov2, 0.5 * (hsysdown -> GetBinContent(1) - hsysup -> GetBinContent(1)), 0.5 * (hsysdown -> GetBinContent(2) - hsysup -> GetBinContent(2)));
-      for (unsigned char xind = 1; xind < nbins + 1; xind ++)
-	{
-	  TH1F * hxmax = 
-	    TMath::Abs(hdsignal -> GetBinContent(xind) - hsysdown -> GetBinContent(xind)) >=
-	    TMath::Abs(hdsignal -> GetBinContent(xind) - hsysup -> GetBinContent(xind)) ? 
-	    hsysdown : hsysup;
-	  const double xc = hdsignal -> GetBinContent(xind) - hxmax -> GetBinContent(xind);
-	  const float meanx = 0.5 * (hsysup -> GetBinContent(xind) + hsysdown -> GetBinContent(xind));
-	  for (unsigned char yind = 1; yind < nbins + 1; yind ++)
-	    {
-	      TH1F * hymax = 
-		TMath::Abs(hdsignal -> GetBinContent(yind) - hsysdown -> GetBinContent(yind)) >=
-		TMath::Abs(hdsignal -> GetBinContent(yind) - hsysup -> GetBinContent(yind)) ? 
-		hsysdown : hsysup;
-	      const double yc = hdsignal -> GetBinContent(yind) - hymax -> GetBinContent(yind);
-	      const float meany = 0.5 * (hsysup -> GetBinContent(yind) + hsysdown -> GetBinContent(yind));
-	      const float cov = (hsysup  -> GetBinContent(xind) - meanx) * (hsysup  -> GetBinContent(yind) - meany) +
-		(hsysdown  -> GetBinContent(xind) - meanx) * (hsysdown  -> GetBinContent(yind) - meany);
-	      //      printf("xind %u yind %u  meanx %f meany y %f up(xind) %f up(yind) %f down(xind) %f down(yind) %f cov %.12f\n", xind, yind, meanx, meany, hsysup  -> GetBinContent(xind), hsysup  -> GetBinContent(yind), hsysdown  -> GetBinContent(xind), hsysdown  -> GetBinContent(yind), cov);
-	      char sign = 0.0;
-	      if (cov > 0.0)
-		{
-		  sign = 1.0;
-		}
-	      else if (cov < 0.0)
-		{
-		  sign = -1.0;
-		}
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += TMath::Abs(xc)*TMath::Abs(yc)*sign; 
-	    }
-	}
-      delete hsysdown;
-      delete hsysup;
-    }
-  for (vector<SampleDescriptor *>::iterator it = _markedsyssamples.begin(); it != _markedsyssamples.end(); it ++)
-    {
-      printf("creating matrix \n", (*it) -> GetTag());
-      TH1 * hdsignal = (TH1*) GetSys(IN, (*it) -> GetTag(), signaltag) -> Project(GEN);
-      hdsignal -> SetDirectory(nullptr);
-      hdsignal -> Scale(1.0/hdsignal -> Integral());
-
-      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag(), signaltag) -> Project(GEN, "markedsys");
-      hsys -> SetDirectory(nullptr);
-      //      NormaliseToBinWidth(hsys);
-      hsys -> Scale(1.0 / hsys -> Integral());
-      for (unsigned char xind = 1; xind < nbins + 1; xind ++)
-	{
-	  const float meanx = 0.5 * (hsys -> GetBinContent(xind) + hdsignal -> GetBinContent(xind));
-	  for (unsigned char yind = 1; yind < nbins + 1; yind ++)
-	    {
-	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignal -> GetBinContent(yind));
-	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
-		(hdsignal  -> GetBinContent(xind) - meanx) * (hdsignal  -> GetBinContent(yind) - meany);
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
-	    }
-	}
-      delete hdsignal;
-    }
-  for (vector<SampleDescriptor *>::iterator it = _nonexpsyssamples.begin(); it != _nonexpsyssamples.end(); it ++)
-    {
-      printf("creating matrix %s\n", (*it) -> GetTag());
-      TH1 * hdsignalprox = nullptr;
-      if ((*it) -> GetSysType() == THEORSYS)
-	{
-	  hdsignalprox = (TH1*) GetSys(IN, (*it) -> GetTag(), signaltag) -> Project(GEN);
-	  hdsignalprox -> SetDirectory(nullptr);
-	  hdsignalprox -> Scale(1.0/hdsignalprox -> Integral());
-	}
-      else
-	{
-	  hdsignalprox = hdsignal;
-	}
-      TH1F * hsys = GetSys(resultlevel, (*it) -> GetTag(), signaltag) -> Project(GEN, "markedsys");
-      hsys -> SetDirectory(nullptr);
-      //      NormaliseToBinWidth(hsys);
-      hsys -> Scale(1.0 / hsys -> Integral());
-      for (unsigned char xind = 1; xind < nbins + 1; xind ++)
-	{
-	  const float meanx = 0.5 * (hsys -> GetBinContent(xind) + hdsignalprox -> GetBinContent(xind));
-	  for (unsigned char yind = 1; yind < nbins + 1; yind ++)
-	    {
-	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignalprox -> GetBinContent(yind));
-	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
-		(hdsignalprox  -> GetBinContent(xind) - meanx) * (hdsignalprox  -> GetBinContent(yind) - meany);
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
-	    }
-	}
-      if ((*it) -> GetSysType() == THEORSYS)
-	{
-	  delete hdsignalprox;
-	}
-    }
-
-  printf("covariance matrix\n");
-  GetLevel(resultlevel) -> cov -> Print();
-  TCanvas * c = new TCanvas("cov", "cov");
-  GetLevel(resultlevel) -> cov -> Draw("COLZ");
-  c -> SaveAs(TString(_folder) + "/cov.png");
-  delete hdsignal;
-  printf("end creating cov\n");
-  //  getchar();
 } 
+
+void CompoundHistoUnfolding::CreateChiTable()
+{
+  TH1 * hsignal = GetLevel(OUT) -> GetHU(SIGNALMO) -> Project(GEN);
+  const unsigned char nbins = hsignal -> GetNbinsX();
+  printf("nbins %u\n", nbins);
+  TMatrixD covinv(*GetLevel(OUT) -> cov);
+  // covinv.Print();
+  // getchar();
+  covinv.Invert();
+  // covinv.Print();
+  // getchar();
+  const unsigned char resultlevel = OUT;
+  struct TableEntry
+  {
+    TString title;
+    float D;
+    float p;
+  };
+  vector<TableEntry *> table;
+  const bool prune = false;
+  for (vector<HistoUnfolding *> :: iterator it = GetLevel(OUT) -> GetV(SYSMO, signaltag) -> begin(); it != GetLevel(OUT) -> GetV(SYSMO, signaltag) -> end(); it ++)
+    {
+      //      (*it) -> ls();
+      if ((*it) -> GetSysType() != THEORSYS)
+  	continue;
+      if (TString(method) == "cflip" and TString((*it) -> GetTag()) == "MC13TeV_TTJets_cflip")
+	{
+	  continue;
+	}
+      TH1 * hsig  = GetSignalProxy(OUT, GEN, signaltag, (*it) -> GetSysType(), (*it) -> GetTag(), prune);
+      const double integralnominal = hsig -> Integral();
+      if (not integralnominal)
+  	continue;
+	  
+      //TH1 * hsys  = (*it) -> Project(GEN);
+      TH1 * hsys = GetLevel(OUT) -> GetHU(SIGNALPROXY, OUT) -> Project(GEN, "hsystesttest");
+
+      if (prune)
+	Prune(hsys, (*it) -> GetTag(), (*it) -> GetSample(), (*it) -> GetSysType(), GEN );
+      hsys -> Scale(/*integralnominal*/1.0/hsys -> Integral());
+      hsig -> Scale(1.0/hsig -> Integral());
+      
+      // hsig -> Print("all");
+      // hsys -> Print("all");
+      // getchar();
+      TMatrixD Diff(1, nbins - 1);
+      for (unsigned char bind = 0; bind < nbins - 1; bind ++)
+  	{
+  	  Diff(0, bind) = hsys -> GetBinContent(bind + 1) - hsig -> GetBinContent(bind + 1);
+  	}
+      // Diff.Print();
+      // getchar();
+      TMatrixD DiffT(Diff);
+      DiffT.T();
+      const float D = (Diff * covinv * DiffT)(0, 0);
+      TableEntry * entry = new TableEntry;
+      entry -> title = (*it) -> GetTitle();
+      entry -> D = D;
+      entry -> p = TMath::Prob(D, nbins -1);
+      table.push_back(entry);
+      delete hsig;
+      delete hsys;
+    }
+
+  for (vector<TableEntry *> ::iterator it1 = table.begin(); it1 != table.end(); it1 ++)
+    {
+      for (vector<TableEntry *> ::iterator it2 = it1 + 1; it2 != table.end(); it2 ++)
+	{
+	  if ((*it1) -> D < (*it2) -> D)
+	    {
+	      TableEntry *swap = *it1;
+	      (*it1) = (*it2);
+	      (*it2) = swap;
+	    }
+	}
+
+    }
+  
+
+  {
+    TH2 * h2 =  (TH2 *) GetLevel(IN) -> GetHU(SIGNALMO) -> GetTH2() -> Clone("signal");// -> Project(GEN)) -> Print("all");
+    for (unsigned char bindx = 0; bindx <= h2 -> GetNbinsX() + 1; bindx ++)
+      h2 -> SetBinContent(bindx, 0, 0.0);
+    for (unsigned char bindy = 0; bindy <= h2 -> GetNbinsY() + 1; bindy ++)
+      {
+	//	h2 -> SetBinContent(0, bindy, 0.0);
+      }
+    // TH2 * h2test = (TH2*) h2 -> Clone("h2test");
+    // TH1 * h2testprojy = h2test -> ProjectionY("h2testprojy");
+    TH1 * hsig = /*h2 -> ProjectionY(); */GetSignalProxy(OUT, GEN, signaltag, NOMINAL, "", prune); //GetLevel(IN) -> GetHU(SIGNALMO) -> GetTH2();
+    TH1 * hsys = GetLevel(OUT) -> GetHU(SIGNALPROXY, OUT) -> Project(GEN, "hsystesttest");
+    if (prune)
+      Prune(hsys, "", "", NOMINAL, GEN);
+    // for (unsigned char bind = 1; bind < nbins + 1; bind ++)
+    //   {
+    // 	const float fact = h2test -> Integral(1, h2test -> GetNbinsX(), bind, bind)/h2test -> Integral(0, h2test -> GetNbinsX(), bind, bind);
+    // 	h2testprojy -> SetBinContent(bind, h2testprojy -> GetBinContent(bind) * fact);
+    // 	//printf(" after %f %f\n", h2testprojy -> GetBinContent(bind), h2test -> GetBinContent(0, bind));
+    // 	h2test -> SetBinContent(0, bind, 0.0);
+    // 	printf("%f hsys %f", fact, hsys -> GetBinContent(bind));
+    // 	hsys -> SetBinContent(bind, hsys -> GetBinContent(bind) * fact);
+    // 	printf(" after %f %f\n", hsys -> GetBinContent(bind), h2test -> GetBinContent(0, bind));
+    //   }
+    const double integralnominal = hsig -> Integral();
+    hsig -> Scale(1.0/hsig -> Integral());
+    hsys -> Scale(/*integralnominal*/1.0/hsys -> Integral());
+    TMatrixD Diff(1, nbins - 1);
+    for (unsigned char bind = 0; bind < nbins - 1; bind ++)
+      {
+	Diff(0, bind) = hsys -> GetBinContent(bind + 1) - hsig -> GetBinContent(bind + 1);
+      }
+    Diff.Print();
+    //getchar();
+    TMatrixD DiffT(Diff);
+    DiffT.T();
+    const float D = (Diff * covinv * DiffT)(0, 0);
+    TableEntry * entry = new TableEntry;
+    entry -> title = /*"data-bckg";*/(GetLevel(IN) -> GetHU(SIGNALMO)) -> GetTitle();
+    entry -> D = D;
+    entry -> p = TMath::Prob(D, nbins -1);
+    table.insert(table.begin(), entry);
+    delete hsig;
+    delete hsys;
+    delete h2;
+
+  }
+
+
+  FILE *chifile = fopen((TString(_folder) + "/chi2.txt").Data(), "w");
+
+  for (vector<TableEntry *> ::iterator it = table.begin(); it != table.end(); it ++)
+    {
+      printf("%s %f %f\n", ((*it) -> title).Data(), (*it) -> D, (*it) -> p);
+      fprintf(chifile, "%s, %f %f\n", ((*it) -> title).Data(), (*it) -> D, (*it) -> p);
+      
+    }
+  fclose(chifile);
+  for (vector<TableEntry *> ::iterator it = table.begin(); it != table.end(); it ++)
+    {
+      delete *it;
+      
+    }
+
+}
+
 
 double CompoundHistoUnfolding::GetChi() 
 {
@@ -376,75 +609,57 @@ double CompoundHistoUnfolding::GetChi()
     {
       D(bin_ind - 1, 0) = hdata -> GetBinContent(bin_ind) - hmodel -> GetBinContent(bin_ind);
     }
-  printf("D-M\n");
-  D.Print();
+  // printf("D-M\n");
+  // D.Print();
   TMatrixD DTr(1, nbins);
   DTr = DTr.Transpose(D);
   //DTr.Print();
   TMatrixD inv(*GetLevel(OUT) -> cov);
   inv.Invert();
   
-  inv.Print();
+  //  inv.Print();
   TMatrixD  A(1, nbins);
   A.Mult(DTr, inv);
   
   TMatrixD chi(1, 1);
-  printf("chi:\n");
+  //  printf("chi:\n");
   chi.Mult(A, D);
-  chi.Print();
+  //chi.Print();
   delete hdata;
   delete hmodel;
   return chi(0, 0);
 }
 
-TH1 * CompoundHistoUnfolding::GetSignalProxy(ResultLevelCode_t resultcode, RecoLevelCode_t recocode, const char * sample, ExpSysType_t sys, const char * tag)
+HistoUnfolding * CompoundHistoUnfolding::GetUnfoldingHU(const char * tag, const char * sample, SysTypeCode_t code)
 {
-  if (resultcode == IN)
+  Level * level = GetLevel(IN);
+  if (code == EXPSYS)
     {
       if (TString(sample) == signaltag)
 	{
-	  return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
+	  level -> GetSys(tag, sample);
 	}
       else
-	{
-	  return GetBackgroundH(sample) -> Project(recocode);
-	}
+	return level -> GetHU(SIGNALPROXY, IN);
     }
-  if (resultcode == OUT)
-    {
-      if (TString(sample) == signaltag)
-	{
-	  if (sys == EXPSYS)
-	    {
-	    return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
-	    }
-	  if (sys == THEORSYS)
-	    {
-	      // if (TString(tag).Contains("non_clos"))
-	      // 	printf("%p\n", GetSys(IN, tag, sample));
-	      
-	      TH1 * hsigprox = GetSys(IN, tag, sample) -> Project(recocode);
-	      if (recocode == RECO)
-		{
-		  ApplyScaleFactor(hsigprox);
-		  // 	  TH2 * signalmatrix = GetSys(IN, tag, sample) -> GetTH2();
-		  // 	  for (unsigned char bind = 0; bind <= hsigprox -> GetNbinsX() + 1; bind ++)
-
-
-	      // 	    {
-	      // 	      const float fact = signalmatrix -> GetBinContent(bind, 0) / signalmatrix -> Integral(bind, bind, 0, signalmatrix -> GetNbinsY() + 1);
-	      // 	      hsigprox -> SetBinContent(bind, hsigprox -> GetBinContent(bind) * fact);
-	      // 	    }
-	      	}
-
-	      return hsigprox;
-	    }
-	}
-      else
-	{
-	  return GetLevel(resultcode) -> GetHU(SIGNALPROXY, resultcode) -> Project(recocode, CreateName("sig"));
-
-	}
-
-    }
+  if (code == THEORSYS or code == NOMINAL)
+    return level -> GetHU(SIGNALPROXY, IN);
 }
+
+void CompoundHistoUnfolding::Prune(TH1 * h, const char * tag, const char * sample, SysTypeCode_t code, RecoLevelCode_t recolevel)
+{
+  
+  if (recolevel == GEN)
+    {
+      TH2  * matrix = GetUnfoldingHU(tag, sample, code) -> GetTH2();
+      for (unsigned char bind = 1; bind <= h -> GetNbinsX(); bind ++)
+	{
+	  const float fact = matrix -> Integral(1, matrix -> GetNbinsX(), bind, bind)/matrix -> Integral(0, matrix -> GetNbinsX(), bind, bind);
+	  //printf("pruning %f %f", fact, h -> GetBinContent(bind));
+	  h -> SetBinContent(bind, h -> GetBinContent(bind) * fact);
+	  //printf(" after %f\n", h -> GetBinContent(bind));
+	}
+    }
+  
+}
+

@@ -2,9 +2,12 @@
 #define _Definitions_hh_
 #include "TString.h"
 enum SampleType {DATA, SIGNAL, BACKGROUND};
+enum VectorEnum_t     {LEADING_JET, SCND_LEADING_JET, LEADING_B, SCND_LEADING_B, HAD_B, LEPT_B, HAD_W, HAD_T, LEPTON, NEUTRINO, LEPT_W, LEPT_T, BEAM, FAKE, ALLJETS = 255 };
+enum ChargeEnum_t     {ALLCOMP, CHARGED};
+
 enum MO {DATAMO, SIGNALMO, BACKGROUNDMO, SIGNALNOMINALMO, SYSMO, DATAMBCKG, TOTALMC, TOTALMCUNC, TOTALMCUNCSHAPE, TOTALMCSIGNALPROXY, SIGNALPROXY};
 typedef unsigned char MOCode_t;
-enum SystematicsType {NOMINAL, EXPSYS, THEORSYS};
+enum SystematicsType {NOMINAL, EXPSYS, THEORSYS, THEORSYSTEST};
 typedef unsigned char SampleTypeCode_t;
 typedef unsigned char SysTypeCode_t;
 typedef unsigned char ResultLevelCode_t;
@@ -25,7 +28,7 @@ typedef unsigned char  OptCode_t;
 extern const char    * tag_resultlevel[2];
 extern const char    * tag_recolevel[2];
 extern const char    * tag_sample[3];
-extern const char    * tag_sys_type[3];
+extern const char    * tag_sys_type[4];
 extern const char    * tag_opt[2];  
 extern const char    * tag_sys[2];
 extern const char    * tag_sf[2];

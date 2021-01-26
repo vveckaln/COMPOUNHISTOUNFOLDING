@@ -4,7 +4,7 @@
 #include "TMath.h"
 ClassImp(CompoundHistoUnfolding);
 using namespace TMath;
-void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
+void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter, bool includecflip)
 {
   TH2 * hsignal = (TH2 *) GetLevel(IN) -> GetHU(SIGNALMO) -> GetTH2() -> Clone("unfolding_signal");
   TH2 * hsignalorig = (TH2 *) GetLevel(IN) -> GetHU(SIGNALMO) -> GetTH2() -> Clone("unfolding_signal_orig");
@@ -24,8 +24,11 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
     }
   for (unsigned char bind = 0; bind <= hsignal -> GetNbinsY() + 1; bind ++)
     {
-      // if (hsignal -> Integral(bind, bind, 0, hsignal -> GetNbinsY() + 1) > 0.0)
-      //   hmeas -> SetBinContent(bind, hmeas -> GetBinContent(bind) * (1.0 - hsignal -> GetBinContent(bind, 0)/hsignal -> Integral(bind, bind, 0, hsignal -> GetNbinsY() + 1)));
+      // if (hsignal -> Integral(0, hsignal -> GetNbinsX() + 1, bind, bind) > 0.0)
+      // 	{
+      // 	  hgen -> SetBinContent(bind, hgen -> GetBinContent(bind) * (1.0 - hsignal -> GetBinContent(0, bind)/hsignal -> Integral(0, hsignal -> GetNbinsX() + 1, bind, bind)));
+      // 	  hgen -> SetBinError(bind, hgen -> GetBinError(bind) * (1.0 - hsignal -> GetBinContent(0, bind)/hsignal -> Integral(0, hsignal -> GetNbinsX() + 1, bind, bind)));
+      // 	}
       //      hsignal -> SetBinContent(0, bind, 0.0);
     }
 
@@ -35,6 +38,7 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
   RooUnfoldResponse response(hreco, hgen, hsignal);
   RooUnfoldBayes   unfold (&response, hmeas, kiter);
   TH1* houtput = (TH1D*) unfold.Hreco();
+  houtput -> SetTitle(TString("data (") + GetLevel(IN) -> GetHU(SIGNALMO) -> GetTitle() + ") unfolded");
   for (unsigned char bind = 0; bind < houtput -> GetNbinsX() + 1; bind ++)
     {
       const float coeff = hsignalorig -> Integral(1, hsignalorig -> GetNbinsX() + 1, bind, bind)/hsignalorig -> Integral(0, hsignalorig -> GetNbinsX(), bind, bind);
@@ -109,8 +113,11 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
 		    }
 		  for (unsigned char bind = 0; bind <= hsignal -> GetNbinsY() + 1; bind ++)
 		    {
-		      // if (hsignal -> Integral(bind, bind, 0, hsignal -> GetNbinsY() + 1) > 0.0)
-		      //   hmeas -> SetBinContent(bind, hmeas -> GetBinContent(bind) * (1.0 - hsignal -> GetBinContent(bind, 0)/hsignal -> Integral(bind, bind, 0, hsignal -> GetNbinsY() + 1)));
+		      // if (mmatrixsyst -> Integral(0, mmatrixsyst -> GetNbinsX() + 1, bind, bind) > 0.0)
+		      // 	{
+		      // 	  input -> SetBinContent(bind, input -> GetBinContent(bind) * (1.0 - mmatrixsyst -> GetBinContent(bind, 0)/mmatrixsyst -> Integral(0, mmatrixsyst -> GetNbinsX() + 1, bind, bind)));
+		      // 	  input -> SetBinError(bind, input -> GetBinError(bind) * (1.0 - mmatrixsyst -> GetBinContent(bind, 0)/mmatrixsyst -> Integral(0, mmatrixsyst -> GetNbinsX() + 1, bind, bind)));
+		      	      // 	}
 		      //mmatrixsyst -> SetBinContent(0, bind, 0.0);
 		    }
 		  TH1 * hmatrixsystgen = mmatrixsyst -> ProjectionY("mmatrixsystgen");
@@ -139,10 +146,18 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
 		  delete hmatrixsystreco;
 		  delete mmatrixsystorig;
 		}
-	      if ((*it) -> GetSysType() == THEORSYS)
+	      if ((*it) -> GetSysType() == THEORSYS or (*it) -> GetSysType() == THEORSYSTEST)
+		
 		{
-		  //		  printf("unfolding %s\n", (*it) -> GetTag());
+		  if (TString(method) == "nominal" and TString((*it) -> GetTag()) == "MC13TeV_TTJets_cflip" and not includecflip)
+		    {
+		      printf("found cflip: continuing");
+		      getchar();
+		      continue;
+		    }
+
 		  TH2 * inputsysh2 = (TH2*)(*it) -> GetTH2() -> Clone("inputsysh2");
+
 		  //inputsysh2 -> RebinX(2);
 		  TH1* inputsys = inputsysh2 -> ProjectionX("inputsys");
 		  TH1* inputsysgen = inputsysh2 -> ProjectionY("inputsysgen");
@@ -210,7 +225,7 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
   nonclosin -> SetSysType(THEORSYS);
 
   const unsigned char nbins = hsignal -> GetNbinsY(); 
-  float binsrecord[nbins];
+  double binsrecord[nbins];
   double binsrecordold[nbins];
   for (unsigned char bind = 0; bind < nbins; bind ++)
     {
@@ -222,7 +237,7 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
   float covrecord = 1E6;
   auto varylambdanest = [ &binsrecord, &binsrecordold, &covrecord, nbins, this](unsigned char start)  -> void
     {
-      float bins[nbins];
+      double bins[nbins];
 
       auto varylambda =[&bins, &binsrecord, &binsrecordold, &covrecord, nbins, this](unsigned char start, unsigned char k, auto & func) -> void
       {
@@ -233,7 +248,7 @@ void CompoundHistoUnfolding::unfoldBayesian(unsigned char kiter)
         // getchar();                                                                                                                                                                                       
         const unsigned long M = 1E4;
         double step = (max - min) /  TMath::Power(M * nbins, 1.0/nbins);
-	for (float coeff = min; coeff <= max; coeff += step)
+	for (double coeff = min; coeff <= max; coeff += step)
 	  {
 	    bins[start] = coeff;
 	    if (start < nbins - 1)

@@ -7,17 +7,21 @@ HistoUnfoldingTH1::HistoUnfoldingTH1():  _th1RECO(nullptr), _th1GEN(nullptr)
 
 }
 
-HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd):  _th1RECO(nullptr), _th1GEN(nullptr), HistoUnfolding(sd)
+HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd): _th1RECO(nullptr), _th1GEN(nullptr), HistoUnfolding(sd)
 {
   //  printf("calling HistoUnfoldingTH1::HistoUnfoldingTH1(SampleDescriptor * sd)\n");
 }
 
-HistoUnfoldingTH1::HistoUnfoldingTH1(HistoUnfoldingTH1 *h, const char * name): 
-_th1RECO((TH1F*) h -> GetTH1(RECO) -> Clone(TString(name) + "_reco")), 
-_th1GEN((TH1F*) h -> GetTH1(GEN) -> Clone(TString(name) + "_gen")), 
-HistoUnfolding((SampleDescriptor*) h)
+HistoUnfoldingTH1::HistoUnfoldingTH1(HistoUnfoldingTH1 *h, const char * name): HistoUnfoldingTH1((SampleDescriptor*) h)
 {
-
+  if ((TH1F*) h -> GetTH1(RECO))
+    {
+      _th1RECO = (TH1F*) h -> GetTH1(RECO) -> Clone(TString(name) + "_reco"); 
+    }
+  if ((TH1F*) h -> GetTH1(GEN))
+    {
+      _th1GEN = (TH1F*) h -> GetTH1(GEN) -> Clone(TString(name) + "_gen");
+    }
 }
 
 

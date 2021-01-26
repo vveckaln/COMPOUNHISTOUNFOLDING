@@ -85,7 +85,7 @@ public:
     HistoUnfolding                              * totalMC;
     HistoUnfolding                              * totalMCUnc;
     HistoUnfolding                              * totalMCUncShape;
-    HistoUnfolding                              * datambackground;;
+    HistoUnfolding                              * datambackground;
     
     HistoUnfolding                      *& GetHURef(MOCode_t, ResultLevelCode_t resultcode = 3); 
     HistoUnfolding                      * GetHU(MOCode_t, ResultLevelCode_t resultcode = 3); 
@@ -114,6 +114,8 @@ public:
     ~Level();
     ClassDef(Level, 1);
   } INLEVEL, OUTLEVEL;
+  void PrintMigrationMatrix();
+  HistoUnfolding * GetUnfoldingHU(const char *, const char * sample, SysTypeCode_t );     
   void AddXsecSystematics();
   HistoUnfolding * GetBackgroundH(const char *);
   void PrintScaleFactors();
@@ -125,7 +127,7 @@ public:
   Level * GetLevel(ResultLevelCode_t);
   vector<HistoUnfolding *> * GetV(ResultLevelCode_t, MOCode_t, const char * sampletag = nullptr);
   void AggregateBackgroundMCs();
-  void CreateTotalMCUnc(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
+  void CreateTotalMCUnc(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false, const char * binning = "", const char * unfm = "", bool includecflip = false, const char * env = "lx");
   void CreateTotalMCUncOLD(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
   void Compareunc(ResultLevelCode_t = IN, RecoLevelCode_t = RECO, bool shape = false);
   void CreateMCTotal(ResultLevelCode_t = IN);
@@ -136,13 +138,18 @@ public:
   void ApplyScaleFactor(TH2 *h);
   void Format();
   void createCov();
+  void createCov_new();
+  
   HistoUnfolding                   * GetExpSys(ResultLevelCode_t, const char *, ExpSysType_t );
   HistoUnfolding                   * GetSys(ResultLevelCode_t, const char * , const char * sample);
-  TH1                   * GetSignalProxy(ResultLevelCode_t, RecoLevelCode_t recocode, const char *, ExpSysType_t sys = 0, const char * = nullptr);
+  TH1                   * GetSignalProxy(ResultLevelCode_t, RecoLevelCode_t recocode, const char *, ExpSysType_t sys = 0, const char * = nullptr, bool pruned = false);
   void MarkSysSample(const char *);
-  void LoadHistos(const char *, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
+  void LoadHistos(const char * json, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
+  void LoadHistos_cflip(const char * json, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
+
+  void TransferHistos(const char * json, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
   void FillHistos(const char *, SysTypeCode_t = NOMINAL, const char * sample = nullptr);
-  void AddHisto(HistoUnfoldingTH2 *);
+  void AddHisto(HistoUnfoldingTH2 *, const char * noscale = "");
   //  void LoadSys(const char *);
   void NormaliseToBinWidth(TH1 *h);
   void RejectNonReco(TH1 *h);						
@@ -153,9 +160,9 @@ public:
   void PlotDataMC();
   void Do();
   void Process(bool reg = false);
-  void unfold(bool reg = false);
+  void unfold(bool reg = false, bool includecflip = false);
   void unfoldBayesianOLD(unsigned char = 1);
-  void unfoldBayesian(unsigned char = 1);
+  void unfoldBayesian(unsigned char = 1, bool includecflip = false);
   void PullAnalysis();
   TPad * CreateRatioGraph(RecoLevelCode_t = RECO, ResultLevelCode_t = IN);
   TPad * CreateMainPlot(RecoLevelCode_t = RECO, ResultLevelCode_t = IN);
@@ -174,11 +181,17 @@ public:
   void SetYaxisTitle(const char *);
   void SetLuminosity(float);
   void SetCOM(const char  *);
+  void Prune(TH1 * h, const char * tag, const char * sample, SysTypeCode_t code, RecoLevelCode_t recolevel);
   HistoUnfoldingTH2 * GetBackgroundTotal();
   void WriteHistograms();
   bool IsRegular() const;
+  void CreateChiTable();
+  void CreateChiTableFull();
+  void Fix();
+  void Check();
   TCanvas * stabpur();
   ClassDef(CompoundHistoUnfolding, 1);
+  
 };
 
 #endif
