@@ -15,8 +15,8 @@ void CompoundHistoUnfolding::createCov()
   hdsignal -> Scale(1.0/hdsignal -> Integral());
   //NormaliseToBinWidth(hdsignal);
   const unsigned char nbins = hdsignal -> GetNbinsX() - 1;
-  GetLevel(resultlevel) -> cov = new TMatrixD(nbins, nbins);
-  GetLevel(resultlevel) -> cov -> Zero();
+  GetLevel(resultlevel) -> SetCov(new TMatrixD(nbins, nbins));
+  GetLevel(resultlevel) -> GetCov() -> Zero();
   //  GetLevel(resultlevel) -> cov -> Print();
   unsigned char ind = 0;
   for (vector<SampleDescriptor *>::iterator it = _expsyssamples.begin(); it != _expsyssamples.end(); it ++)
@@ -69,7 +69,7 @@ void CompoundHistoUnfolding::createCov()
 		{
 		  sign = -1.0;
 		}
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += TMath::Abs(xc)*TMath::Abs(yc)*sign; 
+	      (*GetLevel(resultlevel) ->GetCov())(xind - 1, yind - 1) += TMath::Abs(xc)*TMath::Abs(yc)*sign; 
 	    }
 	}
       delete hsysdown;
@@ -94,7 +94,7 @@ void CompoundHistoUnfolding::createCov()
 	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignal -> GetBinContent(yind));
 	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
 		(hdsignal  -> GetBinContent(xind) - meanx) * (hdsignal  -> GetBinContent(yind) - meany);
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
+	      (*GetLevel(resultlevel) -> GetCov())(xind - 1, yind - 1) += cov; 
 	    }
 	}
       delete hdsignal;
@@ -127,7 +127,7 @@ void CompoundHistoUnfolding::createCov()
 	      const float meany = 0.5 * (hsys -> GetBinContent(yind) + hdsignalprox -> GetBinContent(yind));
 	      const float cov = (hsys  -> GetBinContent(xind) - meanx) * (hsys  -> GetBinContent(yind) - meany) +
 		(hdsignalprox  -> GetBinContent(xind) - meanx) * (hdsignalprox  -> GetBinContent(yind) - meany);
-	      (*GetLevel(resultlevel) -> cov)(xind - 1, yind - 1) += cov; 
+	      (*GetLevel(resultlevel) -> GetCov())(xind - 1, yind - 1) += cov; 
 	    }
 	}
       if ((*it) -> GetSysType() == THEORSYS)
@@ -137,9 +137,9 @@ void CompoundHistoUnfolding::createCov()
     }
 
   printf("covariance matrix\n");
-  GetLevel(resultlevel) -> cov -> Print();
+  GetLevel(resultlevel) -> GetCov() -> Print();
   TCanvas * c = new TCanvas("cov", "cov");
-  GetLevel(resultlevel) -> cov -> Draw("COLZ");
+  GetLevel(resultlevel) -> GetCov() -> Draw("COLZ");
   c -> SaveAs(TString(_folder) + "/cov.png");
   delete hdsignal;
   printf("end creating cov\n");

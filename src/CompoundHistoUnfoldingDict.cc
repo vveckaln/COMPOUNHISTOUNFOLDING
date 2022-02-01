@@ -54,7 +54,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 24,
+         instance("CompoundHistoUnfolding", ::CompoundHistoUnfolding::Class_Version(), "interface/CompoundHistoUnfolding.hh", 27,
                   typeid(::CompoundHistoUnfolding), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding) );
@@ -86,7 +86,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding::Level *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding::Level", ::CompoundHistoUnfolding::Level::Class_Version(), "interface/CompoundHistoUnfolding.hh", 71,
+         instance("CompoundHistoUnfolding::Level", ::CompoundHistoUnfolding::Level::Class_Version(), "interface/CompoundHistoUnfolding.hh", 74,
                   typeid(::CompoundHistoUnfolding::Level), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Level::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding::Level) );
@@ -118,7 +118,7 @@ namespace ROOT {
       ::CompoundHistoUnfolding::Level::ProjectionDeco *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::CompoundHistoUnfolding::Level::ProjectionDeco >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 100,
+         instance("CompoundHistoUnfolding::Level::ProjectionDeco", ::CompoundHistoUnfolding::Level::ProjectionDeco::Class_Version(), "interface/CompoundHistoUnfolding.hh", 104,
                   typeid(::CompoundHistoUnfolding::Level::ProjectionDeco), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::CompoundHistoUnfolding::Level::ProjectionDeco::Dictionary, isa_proxy, 4,
                   sizeof(::CompoundHistoUnfolding::Level::ProjectionDeco) );

@@ -5,6 +5,8 @@
 #include "TPaveText.h"
 #include "TLatex.h"
 #include "TStyle.h"
+#include "TExec.h"
+#include "TROOT.h"
 ClassImp(CompoundHistoUnfolding)
 
 void CompoundHistoUnfolding::PrintMigrationMatrix()
@@ -55,8 +57,13 @@ void CompoundHistoUnfolding::PrintMigrationMatrix()
   TCanvas * cmigrationmatrix = new TCanvas("cmm", "cmm", 600, 600);
   cmigrationmatrix -> SetLeftMargin(0.15);
   cmigrationmatrix -> SetRightMargin(0.2);
+  TExec * exgreen = new TExec("exgreen", "palettegreen()");
   migrationmatrix -> Draw("COLZ");
+  exgreen -> Draw();
+  migrationmatrix -> Draw("COLZSAME");
   migrationmatrix -> GetZaxis() -> SetTitle("%");
+  migrationmatrix -> SetMinimum(0.0);
+  migrationmatrix -> SetMaximum(100.0);
   for (unsigned char bindx = 1; bindx <= migrationmatrix -> GetNbinsX(); bindx ++)
     {
       const float integral = migrationmatrix -> Integral(bindx, bindx, 1, migrationmatrix -> GetNbinsX());
@@ -123,8 +130,8 @@ void CompoundHistoUnfolding::PrintMigrationMatrix()
 
     }
   const unsigned char n = 6;
-  Int_t colours[n] = {kGreen -10, kGreen -8, kGreen - 6, kGreen - 4, kGreen - 2, kGreen };
-  gStyle -> SetPalette(n, colours);
+  // Int_t colours[n] = {kGreen -10, kGreen -8, kGreen - 6, kGreen - 4, kGreen - 2, kGreen };
+  // gStyle -> SetPalette(n, colours);
   cmigrationmatrix -> SaveAs("output/formattedmigrationmatrix.png");
   // getchar();
   delete migrationmatrix;

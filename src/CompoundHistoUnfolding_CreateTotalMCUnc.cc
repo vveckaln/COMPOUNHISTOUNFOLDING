@@ -861,7 +861,13 @@ void CompoundHistoUnfolding::CreateTotalMCUnc(ResultLevelCode_t resultcode, Reco
 	      (*th1it) -> SetLineWidth(2.0);
 	      ind ++;
 	      NormaliseToBinWidth(*th1it);
-	      stacks[sample][category] . second -> Add(*th1it);
+	      if (TString(category) == "Colour reconnection")
+		{
+		  printf("category == colour reconnection\n");
+		  // (*th1it) -> Print("all");
+		  // getchar();
+		}
+	      stacks[sample][category] . second -> Add(*th1it, "HISTE");
 	      legends[sample][category]. second -> AddEntry(*th1it, (*th1it) -> GetTitle(), "lp"); 
 	      // printf("%s\n", (*th1it) -> GetName());
 	      // getchar();

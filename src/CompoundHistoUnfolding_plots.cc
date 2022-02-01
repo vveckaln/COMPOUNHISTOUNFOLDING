@@ -14,6 +14,7 @@
 #include "TChain.h"
 #include "TLine.h"
 #include "TLegendEntry.h"
+#include <regex>
 ClassImp(CompoundHistoUnfolding);
 
 THStack * CompoundHistoUnfolding::CreateTHStack(RecoLevelCode_t recocode, ResultLevelCode_t resultcode)
@@ -162,7 +163,9 @@ TPad * CompoundHistoUnfolding::CreateMainPlot(RecoLevelCode_t recocode, ResultLe
       
     }
   else
-    maximum = 1.5 *stack -> GetMaximum();
+    {
+      maximum = 1.5 *stack -> GetMaximum();
+    }
   // stack -> SetMaximum(maximum);
   // stack -> SetMinimum(0.8 * stack -> GetMinimum();
   TPad *pad = new TPad(CreateName("pad1"), CreateTitle("pad1"), 0.0, 0.2, 1.0, 1.0);
@@ -173,7 +176,9 @@ TPad * CompoundHistoUnfolding::CreateMainPlot(RecoLevelCode_t recocode, ResultLe
   hframe -> SetMaximum(maximum);
   //stack -> SetMaximum(maximum);
   if (TString(observable) == "pull_angle" and recocode == GEN)
-    hframe -> SetMinimum(0.85 * totalMCUnc -> GetMinimum());
+    {
+      hframe -> SetMinimum(0.85 * totalMCUnc -> GetMinimum());
+    }
   // hframe -> GetYaxis() -> SetLabelSize(0.20);
   // hframe -> GetYaxis() -> SetTitleSize(0.21);
   // hframe -> GetYaxis() -> SetTitleOffset(0.35);
@@ -230,7 +235,9 @@ TPad * CompoundHistoUnfolding::CreateMainPlot(RecoLevelCode_t recocode, ResultLe
 void CompoundHistoUnfolding::CreateDataGraph(ResultLevelCode_t resultcode, RecoLevelCode_t recocode)
 {
   if (recocode == GEN and resultcode == IN)
-    return;
+    {
+      return;
+    }
   Level * level = GetLevel(resultcode);
   Level::ProjectionDeco * projdeco = level -> GetProjectionDeco(recocode);
   if (projdeco -> _datagr)
@@ -288,6 +295,7 @@ TPad * CompoundHistoUnfolding::CreateRatioGraph(RecoLevelCode_t recocode, Result
   if (not projdeco -> _ratioframe)
     {
       TH1 * htotalMC = level -> GetHU(TOTALMCSIGNALPROXY, resultcode) -> Project(recocode, CreateName("totalmcrg"), _XaxisTitle, "MC/data");
+      TH1 * hdata = level -> GetHU(DATAMO) -> Project(recocode, CreateName("datadg"), "", _YaxisTitle);
       TH1 * htotalMCUnc = level -> GetHU(TOTALMCUNC) -> GetTH1(recocode);
       TH1 * htotalMCUncShape = level -> GetHU(TOTALMCUNCSHAPE) -> GetTH1(recocode);
       /*if (recocode == RECO and resultcode == IN)
@@ -305,7 +313,7 @@ TPad * CompoundHistoUnfolding::CreateRatioGraph(RecoLevelCode_t recocode, Result
       for (unsigned char xbin = 0; xbin < htotalMC -> GetNbinsX() + 1; xbin ++)
 	{    
 	  projdeco -> _ratioframe -> SetBinContent(xbin, 1.0);
-	  const float val = htotalMC -> GetBinContent(xbin);
+	  const float val = hdata -> GetBinContent(xbin);//htotalMC -> GetBinContent(xbin);
 	  htotalMCnoUnc -> SetBinError(xbin, 0.0);
 	  if (val == 0)
 	    {
@@ -320,7 +328,7 @@ TPad * CompoundHistoUnfolding::CreateRatioGraph(RecoLevelCode_t recocode, Result
 	}
       delete htotalMC;
       delete htotalMCnoUnc;
-
+      delete hdata;
     }
   projdeco -> _ratioframe -> Draw("E2");
   projdeco -> _ratioframeshape -> Draw("e2 same");
@@ -401,4 +409,200 @@ TCanvas * CompoundHistoUnfolding::CreateCombinedPlot(RecoLevelCode_t recocode, R
   //  printf("probe C %f\n", _signalh -> _th2 -> Integral());
 
   return c;
+}
+
+void CompoundHistoUnfolding::BottomLineTest()
+{
+  TH1 * hdatambckgin = GetLevel(IN)/*level*/ -> GetHU(DATAMBCKG) -> Project(RECO, "datambckginbottomline", "", _YaxisTitle);
+  ApplyScaleFactor(hdatambckgin);
+  hdatambckgin -> Print("all");
+  hdatambckgin -> SetLineWidth(2);
+  NormaliseToBinWidth(hdatambckgin);
+  TH1 * hdatambckgout = GetLevel(OUT)/*level*/ -> GetHU(DATAMBCKG) -> Project(RECO, "datambckgoutbottomline", "", _YaxisTitle);
+  hdatambckgout -> Print("all");
+  hdatambckgout -> SetLineColor(kRed);
+  hdatambckgout -> SetLineWidth(2);
+  NormaliseToBinWidth(hdatambckgout);
+  TH1 * hdataframe = (TH1*) hdatambckgin -> Clone();
+  hdataframe -> Reset("ICE");
+  TCanvas * canvas = new TCanvas;
+  TPad * pad1 = new TPad(CreateName("bottomlinetestpad1"), CreateTitle("bottomlinetestpad1"), 0.0, 0.3, 1.0, 1.0);
+  pad1 -> Draw();
+  pad1 -> cd();
+  pad1 -> SetRightMargin(0.05);
+  pad1 -> SetLeftMargin(0.2);
+  pad1 -> SetTopMargin(0.06);
+  pad1 -> SetBottomMargin(0.03);
+
+  THStack * stack = new THStack;
+  stack -> Add(hdatambckgin, "HIST");
+  stack -> Add(hdatambckgout, "HIST");
+  hdataframe -> SetMinimum(0.0);
+  hdataframe -> SetMaximum(stack -> GetMaximum("nostack") * 1.4);
+  hdataframe -> GetYaxis() -> SetNdivisions(5);
+  hdataframe -> GetXaxis() -> SetLabelSize(0.0);
+  hdataframe -> GetYaxis() -> SetLabelSize(0.20*0.3/0.7);
+  hdataframe -> GetYaxis() -> SetTitleSize(0.21*0.3/0.7);
+  
+  hdataframe -> GetYaxis() -> SetTitleOffset(0.42*0.7/0.3);
+  hdataframe -> Draw();
+  stack -> Draw("SAMEnostack");
+  TLegend * legend = new TLegend(0.6, 0.6, 0.8, 0.8);
+  legend -> AddEntry(hdatambckgin, "data - b IN", "l");
+  legend -> AddEntry(hdatambckgout, "data - b f unf", "l");
+  legend -> SetLineWidth(0);
+  legend -> SetTextSize(0.06);
+  legend -> Draw("SAME");
+  TLatex * chi2s = new TLatex;
+  char chi[64];
+  sprintf(chi, "#chi_{in}^{2}=%.2f, dof=%u", GetChi(signaltag, IN, RECO, NOMINAL), _nbinsx);
+  chi2s -> DrawLatex(0.2, 6000, chi);
+  sprintf(chi, "#chi_{unf}^{2}=%.2f, dof=%u", GetChi(signaltag, OUT, GEN, NOMINAL), _nbinsy);
+  chi2s -> DrawLatex(0.2, 4000, chi);
+  
+  TPad * pad2 = new TPad(CreateName("bottomlinetestpad2"), CreateTitle("bottomlinetestpad2"), 0.0, 0.0, 1.0, 0.3);
+  canvas -> cd();
+  pad2 -> Draw();
+  pad2 -> cd();
+  pad2 -> SetBottomMargin(0.5);
+  pad2 -> SetRightMargin(0.05);
+  pad2 -> SetLeftMargin(0.2);
+  pad2 -> SetTopMargin(0.1);
+  pad2 -> SetGridx(kFALSE);
+  pad2 -> SetGridy(kTRUE);
+  canvas -> SetBottomMargin(0.0);
+  canvas -> SetLeftMargin(0.0);
+  canvas -> SetTopMargin(0);
+  canvas -> SetRightMargin(0.00);
+  TH1 * hdatambckginframe = (TH1*) hdatambckgin -> Clone();
+  hdatambckginframe -> Divide(hdatambckgout);
+  hdatambckginframe -> GetYaxis() -> SetTitle("#frac{data - b}{data - b f unf}");
+  hdatambckginframe -> SetMaximum(1.2);
+  hdatambckginframe -> SetMinimum(0.8);
+  hdatambckginframe -> GetYaxis() -> SetNdivisions(3);
+  hdatambckginframe -> GetXaxis() -> SetTitle(_XaxisTitle);
+  hdatambckginframe -> GetXaxis() -> SetLabelSize(0.2);
+  hdatambckginframe -> GetXaxis() -> SetTitleSize(0.2);
+  hdatambckginframe -> GetYaxis() -> SetLabelSize(0.2);
+  hdatambckginframe -> GetYaxis() -> SetTitleSize(0.1);
+  
+  hdatambckginframe -> GetYaxis() -> SetTitleOffset(0.42*0.21/0.1);
+  hdatambckginframe -> Draw();
+
+  canvas -> SaveAs(TString(_folder) + "/bottomlinetest.png");
+}
+
+void CompoundHistoUnfolding::CRComparisonPlots()
+{
+    TH1 * hdatambckgout = GetLevel(OUT)/*level*/ -> GetHU(DATAMBCKG) -> Project(GEN, "datambckgoutbottomline", "", _YaxisTitle);
+    
+    NormaliseToBinWidth(hdatambckgout);
+    hdatambckgout -> Scale(1.0/calculatearea(hdatambckgout));
+    TGraphErrors * datagr = new TGraphErrors(hdatambckgout);
+    datagr -> SetMarkerStyle(20);
+    datagr -> SetMarkerSize(1.1);
+    TH1 * MCsignalpred = GetLevel(IN) -> GetHU(SIGNALMO) -> Project(GEN, "signal");
+    NormaliseToBinWidth(MCsignalpred);
+    MCsignalpred -> Scale(1.0/calculatearea(MCsignalpred));
+    MCsignalpred -> SetLineWidth(2);
+    Color_t colors[3] = {kGreen, kRed, kMagenta};
+    const char * tags[3] = {"MC13TeV_TTJets_erdON", "MC13TeV_TTJets_qcdBased", "MC13TeV_TTJets_gluonMove"}; 
+    for (ResultLevelCode_t resultlevel = 0; resultlevel < 2; resultlevel ++)
+      {
+	TH1 * CRsyst[3] = {nullptr, nullptr, nullptr};
+	TCanvas * canvas = new TCanvas;
+	TPad * pad1 = new TPad(CreateName(TString("CRComparisonplots_p1_") + tag_resultlevel[resultlevel]), CreateTitle(TString("bottomlinetestpad1 ") + tag_resultlevel[resultlevel]), 0.0, 0.3, 1.0, 1.0);
+	pad1 -> Draw();
+	pad1 -> cd();
+	pad1 -> SetRightMargin(0.05);
+	pad1 -> SetLeftMargin(0.2);
+	pad1 -> SetTopMargin(0.15);
+	pad1 -> SetBottomMargin(0.03);
+	TH1 * framepad1 = (TH1*) MCsignalpred -> Clone();
+	framepad1 -> Reset("ICE");
+	framepad1 -> GetYaxis() -> SetTitle(_YaxisTitle);
+	framepad1 -> GetYaxis() -> SetLabelSize(0.2*0.3/0.7);
+	framepad1 -> GetYaxis() -> SetTitleSize(0.2*0.3/0.7);
+	framepad1 -> GetYaxis() -> SetTitleOffset(0.3*0.7/0.3);
+	framepad1 -> GetXaxis() -> SetLabelSize(0);
+	
+	TPad * pad2 = new TPad(CreateName(TString("bottomlinetest_p2_") + tag_resultlevel[resultlevel]), CreateTitle(TString("bottomlinetestpad2 ") + tag_resultlevel[resultlevel]), 0.0, 0.0, 1.0, 0.3);
+	canvas -> cd();
+	pad2 -> Draw();
+	pad2 -> cd();
+	pad2 -> SetBottomMargin(0.5);
+	pad2 -> SetRightMargin(0.05);
+	pad2 -> SetLeftMargin(0.2);
+	pad2 -> SetTopMargin(0.1);
+	pad2 -> SetGridx(kFALSE);
+	pad2 -> SetGridy(kTRUE);
+
+	THStack * stack = new THStack;
+	stack -> Add(MCsignalpred, "HIST");
+	TLegend * legend = new TLegend(0.5, 0.5, 0.8, 0.8);
+	legend -> SetLineWidth(0);
+	legend -> AddEntry(datagr, resultlevel == IN ? "data unf" : "data unf", "p");
+	legend -> AddEntry(MCsignalpred, GetLevel(IN) -> GetHU(SIGNALMO) -> GetTitle(), "l");
+	for (unsigned char crind = 0; crind < 3; crind ++)
+	  {
+	    CRsyst[crind] = GetLevel(resultlevel) -> GetSys(
+							    regex_replace(tags[crind], regex("MC13TeV_TTJets"), signaltag).c_str(), signaltag) -> Project(GEN);
+	    CRsyst[crind] -> SetLineColor(colors[crind]); 
+	    CRsyst[crind] -> SetLineWidth(2);
+	    NormaliseToBinWidth(CRsyst[crind]);
+	    CRsyst[crind] -> Scale(1.0/calculatearea(CRsyst[crind]));
+	    legend -> AddEntry(CRsyst[crind], 
+			       resultlevel == IN ? 
+			       GetLevel(resultlevel) -> GetSys(regex_replace(tags[crind], regex("MC13TeV_TTJets"), signaltag).c_str(), signaltag) -> GetTitle() :
+			       (TString(GetLevel(resultlevel) -> GetSys(regex_replace(tags[crind], regex("MC13TeV_TTJets"), signaltag).c_str(), signaltag) -> GetTitle()) + " unf").Data(), 
+			       "l");
+	    stack -> Add(CRsyst[crind], "HIST");
+	  }
+	legend -> SetTextSize(0.06);
+	pad1 -> cd();
+	framepad1 -> SetMinimum(0.8);
+	framepad1 -> SetMaximum(stack -> GetMaximum("nostack") * 1.6);
+	framepad1 -> GetYaxis() -> SetNdivisions(5);
+	framepad1 -> Draw();
+	stack -> Draw("nostackSAME");
+	const unsigned int Npoints = datagr->GetN();
+	double ey;
+	for (unsigned int ind = 0; ind < Npoints; ind++) 
+	  {
+	    ey = datagr -> GetErrorY(ind);
+	    datagr -> SetPointError ( ind, 0.0, ey);	
+	  }
+	datagr -> Draw("SAMEP");
+	
+	legend -> Draw("SAME");
+	TH1* pad2h[4] = {(TH1 *) MCsignalpred -> Clone(), (TH1 *) CRsyst[0] -> Clone(), (TH1 * ) CRsyst[1] -> Clone(), (TH1 *) CRsyst[2] -> Clone()};
+	TH1 * pad2frame = (TH1*) MCsignalpred -> Clone("pad2frame");
+	pad2frame -> Reset("ICE");
+	pad2frame -> SetMinimum(0.8);
+	pad2frame -> SetMaximum(1.2);
+	pad2frame -> GetXaxis() -> SetTitle(_XaxisTitle);
+	pad2frame -> GetXaxis() -> SetLabelSize(0.2);
+	pad2frame -> GetXaxis() -> SetTitleSize(0.2);
+	pad2frame -> GetXaxis() -> SetTitleOffset(0.9);
+	pad2frame -> GetYaxis() -> SetTitle("MC/data");
+	pad2frame -> GetYaxis() -> SetTitleSize(0.2);
+	pad2frame -> GetYaxis() -> SetLabelSize(0.2);
+
+	pad2frame -> GetYaxis() -> SetTitleOffset(0.3);
+	pad2frame -> GetYaxis() -> SetNdivisions(3);
+	pad2 -> cd();
+	pad2frame -> Draw();
+	for (unsigned char pad2ind = 0; pad2ind < 4; pad2ind ++)
+	  {
+	    pad2h[pad2ind] -> Divide(hdatambckgout);
+	    pad2h[pad2ind] -> Draw("SAME");
+	  }
+	canvas -> SetBottomMargin(0.0);
+	canvas -> SetLeftMargin(0.0);
+	canvas -> SetTopMargin(0);
+	canvas -> SetRightMargin(0.00);
+
+	canvas -> SaveAs(TString(_folder) + "/CRcomparison_" + tag_resultlevel[resultlevel] + ".png");
+      }
+
 }

@@ -67,3 +67,46 @@ TH1 * CompoundHistoUnfolding::GetSignalProxy(ResultLevelCode_t resultcode, RecoL
 
     }
 }
+
+
+HistoUnfolding * CompoundHistoUnfolding::GetUnfoldingHU(const char * tag, const char * sample, SysTypeCode_t code)
+{
+  Level * level = GetLevel(IN);
+  if (code == EXPSYS)
+    {
+      if (TString(sample) == signaltag)
+	{
+	  level -> GetSys(tag, sample);
+	}
+      else
+	return level -> GetHU(SIGNALPROXY, IN);
+    }
+  if (code == THEORSYS or code == NOMINAL)
+    return level -> GetHU(SIGNALPROXY, IN);
+}
+
+HistoUnfolding * CompoundHistoUnfolding::GetExpSys(ResultLevelCode_t resultcode, const char * expsystag, ExpSysType_t expsyscode)
+{
+  vector<HistoUnfolding *>::iterator it = GetV(resultcode, SYSMO, signaltag) -> begin();
+  HistoUnfolding * expsys = nullptr;
+  const TString comp = expsyscode == UP ? "_up" : "_down";
+  while ( it != GetV(resultcode, SYSMO, signaltag) -> end() or not expsys)
+    {
+      //(*it) -> ls();
+      //      printf("%s\n", (*it) -> GetTag());
+      TString tag ((*it) -> GetTag());
+      if (TString(expsystag) + comp == tag)
+	{
+	  expsys = *it;
+	}
+      it ++;
+    }
+  return expsys;
+}
+
+HistoUnfolding * CompoundHistoUnfolding::GetSys(ResultLevelCode_t resultcode, const char * systag, const char * sample)
+{
+  
+  return GetLevel(resultcode) -> GetSys(systag, sample);
+}
+

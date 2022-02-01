@@ -1,0 +1,2 @@
+void palettegreen();
+void palettedefault();

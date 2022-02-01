@@ -15,6 +15,7 @@
 #include "TChain.h"
 #include "TLine.h"
 #include "TLegendEntry.h"
+
 ClassImp(CompoundHistoUnfolding);
 const unsigned char nbckg = 6;
 const char * bckgtitles[nbckg] = {"QCD", "t#bar{t}+V", "Multiboson", "DY", "W", "Single top"};
@@ -70,8 +71,10 @@ HistoUnfolding * CompoundHistoUnfolding::GetBackgroundH(const char * tag)
   //     printf("%p [%s] %u \n", *it, (*it) -> GetTag(), TString((*it) -> GetTag()) != tag);
   //   };
   // printf("it %p\n", it);
-  if (it == _vbackgroundhistos.end())
-    return nullptr;
+    if (it == _vbackgroundhistos.end())
+      {
+	return nullptr;
+      }
   //  printf(" returing background histo %s returning %s\n", tag, (*it) -> GetTag());
 
   return *it;
@@ -308,8 +311,10 @@ void CompoundHistoUnfolding::AggregateBackgroundMCs()
 void CompoundHistoUnfolding::CreateBackgroundTotal()
 {
   if (totalbackground)
-    delete totalbackground;
- for (map<TString, HistoUnfolding *>::iterator it = aggrbackgroundMC.begin(); it != aggrbackgroundMC.end(); it ++)
+    {
+      delete totalbackground;
+    }
+  for (map<TString, HistoUnfolding *>::iterator it = aggrbackgroundMC.begin(); it != aggrbackgroundMC.end(); it ++)
     {
       if (not totalbackground)
 	{
@@ -317,8 +322,11 @@ void CompoundHistoUnfolding::CreateBackgroundTotal()
 	  totalbackground -> GetTH2Ref() = (TH2F*) it -> second -> GetTH2() -> Clone(CreateName("totalbackground"));
 	  totalbackground -> GetTH2() -> SetDirectory(nullptr);
 	}
+      
       else
-        totalbackground -> GetTH2() -> Add(it -> second -> GetTH2());
+	{
+	  totalbackground -> GetTH2() -> Add(it -> second -> GetTH2());
+	}
     }
 }
 
@@ -365,7 +373,7 @@ void CompoundHistoUnfolding::CreateMCTotal(ResultLevelCode_t resultcode)
 	  delete bckgsfRECO;
 	}
       totalMC -> GetTH1Ref(GEN) = GetLevel(resultcode) -> GetHU(SIGNALPROXY, OUT) -> Project(GEN, CreateName("MCtotalOUTGEN"));
-      TH1F *bckgGEN = totalbackground -> Project(GEN);
+      TH1 *bckgGEN = totalbackground -> Project(GEN);
       totalMC -> GetTH1(GEN) -> Add(bckgGEN);
       GetLevel(resultcode) -> GetHU(DATAMO) -> GetTH1(GEN) -> Add(bckgGEN);
       delete bckgGEN;
@@ -805,4 +813,64 @@ void CompoundHistoUnfolding::PrintNonRecoCoeff()
   printf("end printing non reco coefficients\n");
 	
 
+}
+
+void CompoundHistoUnfolding::printforheplib()
+{
+  FILE * file_data = fopen((string(_folder) + "/forheplibdata.txt").c_str(), "w");
+  TH1 * h_data = (TH1*)  GetLevel(OUT) -> GetHU(DATAMBCKG) -> GetTH1(GEN) -> Clone();
+  printf("preparing file for heplib\n");
+  printf("integrals out %f in %f\n", 
+	 GetLevel(OUT) -> GetHU(DATAMBCKG) -> GetTH1(GEN) -> Integral(), 
+	 GetLevel(IN) -> GetHU(DATAMBCKG) -> GetTH2() -> Integral(1, GetLevel(IN) -> GetHU(DATAMBCKG) -> GetTH2() -> GetNbinsX(), 0, 0));
+  h_data -> Scale(1.0/_luminosity);
+  for (unsigned char bind = 1; bind <= h_data -> GetNbinsX(); bind ++)
+    {
+
+      // printf("%u\t%f\t%f\t%f\t%f\t%f\n", 
+      // 	     bind,
+      // 	     h -> GetXaxis() -> GetBinLowEdge(bind),  
+      // 	     h -> GetXaxis() -> GetBinCenter(bind),
+      // 	     h -> GetXaxis() -> GetBinUpEdge(bind),
+      // 	     h -> GetBinContent(bind)/h -> GetBinWidth(bind),
+      // 	     GetLevel(OUT) -> totalMCUncShape -> GetTH1(GEN) -> GetBinError(bind)/(h -> GetBinWidth(bind) * _luminosity));
+
+
+      fprintf(file_data, "%f\t%f\t%f\t%f\t%f\n", 
+	      h_data -> GetXaxis() -> GetBinLowEdge(bind),  
+	      h_data -> GetXaxis() -> GetBinCenter(bind),
+	      h_data -> GetXaxis() -> GetBinUpEdge(bind),
+	      h_data -> GetBinContent(bind) / h_data -> GetBinWidth(bind),
+	      GetLevel(OUT) -> totalMCUncShape -> GetTH1(GEN) -> GetBinError(bind)/(h_data -> GetBinWidth(bind) * _luminosity));
+    }
+
+  fclose(file_data);
+  delete h_data;
+  FILE * file_mc = fopen((string(_folder) + "/forheplibmc.txt").c_str(), "w");
+  TH1 * h_mc = (TH1*)  GetLevel(IN) -> GetHU(SIGNALMO) -> Project(GEN);
+  printf("integral prediction %f \n", h_mc -> Integral());
+  h_mc -> Scale(1.0/_luminosity);
+  for (unsigned char bind = 1; bind <= h_mc -> GetNbinsX(); bind ++)
+    {
+
+      // printf("%u\t%f\t%f\t%f\t%f\t%f\n", 
+      // 	     bind,
+      // 	     h -> GetXaxis() -> GetBinLowEdge(bind),  
+      // 	     h -> GetXaxis() -> GetBinCenter(bind),
+      // 	     h -> GetXaxis() -> GetBinUpEdge(bind),
+      // 	     h -> GetBinContent(bind)/h -> GetBinWidth(bind),
+      // 	     GetLevel(OUT) -> totalMCUncShape -> GetTH1(GEN) -> GetBinError(bind)/(h -> GetBinWidth(bind) * _luminosity));
+
+
+      fprintf(file_mc, "%f\t%f\t%f\t%f\t%f\n", 
+	      h_mc -> GetXaxis() -> GetBinLowEdge(bind),  
+	      h_mc -> GetXaxis() -> GetBinCenter(bind),
+	      h_mc -> GetXaxis() -> GetBinUpEdge(bind),
+	      h_mc -> GetBinContent(bind) / h_mc -> GetBinWidth(bind),
+	      GetLevel(OUT) -> totalMCUncShape -> GetTH1(GEN) -> GetBinError(bind)/(h_mc -> GetBinWidth(bind) * _luminosity));
+    }
+  fclose(file_mc);
+  delete h_mc;
+
+  //  getchar();
 }

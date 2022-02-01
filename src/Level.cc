@@ -12,7 +12,7 @@ totalMC(nullptr),
 totalMCUnc(nullptr), 
 totalMCUncShape(nullptr), 
 datambackground(nullptr),
-cov(nullptr)
+_cov(nullptr)
 {
 
 }
@@ -346,6 +346,15 @@ HistoUnfolding * CompoundHistoUnfolding::Level::GetExpSys(const char * expsystag
 {
 }
 
+TMatrixD * CompoundHistoUnfolding::Level::GetCov()
+{
+  return _cov;
+}
+
+void CompoundHistoUnfolding::Level::SetCov(TMatrixD * cov)
+{
+  _cov = cov;
+}
 
 
 CompoundHistoUnfolding::Level::~Level()

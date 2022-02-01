@@ -19,7 +19,7 @@ ClassImp(CompoundHistoUnfolding);
 void CompoundHistoUnfolding::unfold(bool reg, bool includecflip)
 {
   printf("includecflip %s\n", includecflip ? "True" : "False");
-  getchar();
+  //  getchar();
   CreateDataMinusBackground(IN);
   TCanvas cmigration("cmigration", "cmigration");
   cmigration.SetRightMargin(0.18);
@@ -251,7 +251,9 @@ void CompoundHistoUnfolding::unfold(bool reg, bool includecflip)
 		    {
 		      const float fractionnongen = mmatrixsyst -> Integral(bind, bind, 0, 0)/mmatrixsyst -> Integral(bind, bind, 0, mmatrixsyst -> GetNbinsY() + 1);
 		      if (TString((*it) -> GetTag()) == "MC13TeV_TTJetstrig_efficiency_correction_up")
-			printf("%f %f \n", mmatrixsyst -> GetBinContent(bind, 0), fractionnongen);
+			{
+			  printf("%f %f \n", mmatrixsyst -> GetBinContent(bind, 0), fractionnongen);
+			}
 		      input -> SetBinContent(bind, input -> GetBinContent(bind) * ( 1 - fractionnongen));
 		      input -> SetBinError(bind, input -> GetBinError(bind) * ( 1 - fractionnongen));
 		      mmatrixsyst -> SetBinContent(bind, 0, 0.0);
@@ -301,8 +303,8 @@ void CompoundHistoUnfolding::unfold(bool reg, bool includecflip)
 		{
 		  if (TString(method) == "nominal" and TString((*it) -> GetTag()) == "MC13TeV_TTJets_cflip" and not includecflip)
 		    {
-		      printf("found cflip: continuing");
-		      getchar();
+		      // printf("found cflip: continuing");
+		      // getchar();
 		      continue;
 		    }
 		  TUnfoldDensity unfold(hsignal, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature, TUnfold::kEConstraintArea, TUnfoldDensity::kDensityModeUser);
@@ -350,16 +352,16 @@ void CompoundHistoUnfolding::unfold(bool reg, bool includecflip)
 		  GetLevel(OUT) -> GetV(SYSMO, sample.Data()) -> push_back(out);
 		  out -> GetTH1Ref(RECO) = (TH1F*) unfold.GetFoldedOutput(CreateName(TString((*it) -> GetTag()) + "_folded_output"));
 		  out -> GetTH1Ref(GEN) = (TH1F*) unfold.GetOutput(CreateName(TString((*it) ->GetTag()) + "_output"));
-		  if (TString((*it) -> GetTag()) == "MC13TeV_TTJets_evtgen")
+		  if (TString((*it) -> GetTag()) == "MC13TeV_TTJets_erdON")
 		    {
-		      printf("listing MC13TeV_TTJets_evtgen after unfolding\n");
-		      printf("input gen\n");
-		      TH1 * inputsysgen = (TH1*)(*it) -> Project(GEN) -> Clone("clonesysgen");
+		      // printf("listing MC13TeV_TTJets_erdON after unfolding\n");
+		      // printf("input gen\n");
+		      // TH1 * inputsysgen = (TH1*)(*it) -> Project(GEN) -> Clone("clonesysgen");
 
-		      inputsysgen -> Print("all");
-		      printf("output\n");
-		      out -> GetTH1Ref(GEN) -> Print("all");
-		      //getchar();
+		      //inputsysgen -> Print("all");
+		      //printf("output\n");
+		      //out -> GetTH1Ref(GEN) -> Print("all");
+		      //		      getchar();
 		    }
 	  
 
@@ -403,7 +405,8 @@ void CompoundHistoUnfolding::unfold(bool reg, bool includecflip)
 
   HistoUnfoldingTH2 * nonclosin = new HistoUnfoldingTH2((SampleDescriptor*) GetLevel(IN) -> GetHU(SIGNALMO));
   nonclosin -> SetTag(TString(nonclosin -> GetTag()) + "_non_clos");
-  nonclosin -> SetCategory("Non closure");
+  nonclosin -> SetCategory("Non closure");  
+  nonclosin -> SetTitle(TString(nonclosout -> GetTitle()) + " non closure (in)");
   nonclosin -> SetSysType(THEORSYS);
 
   const unsigned char nbins = hsignal -> GetNbinsY(); 
